@@ -1,4 +1,10 @@
 const { 
+    Client, 
+    GatewayIntentBits, 
+    EmbedBuilder 
+} = require("discord.js");
+
+const { 
     Client, GatewayIntentBits, EmbedBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
     ModalBuilder, TextInputBuilder, TextInputStyle,
@@ -10,7 +16,6 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
-          GatewayIntentBits.GuildMembers
     ]
 });
 
