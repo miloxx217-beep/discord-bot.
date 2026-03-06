@@ -1,8 +1,3 @@
-const { 
-    Client, 
-    GatewayIntentBits, 
-    EmbedBuilder 
-} = require("discord.js");
 
 const { 
     Client, GatewayIntentBits, EmbedBuilder,
@@ -12,11 +7,12 @@ const {
 } = require("discord.js");
 
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+   intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
+]
 });
 
 // ID SERWERA I KANAŁÓW
