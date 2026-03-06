@@ -10,6 +10,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
+          GatewayIntentBits.GuildMembers
     ]
 });
 
@@ -245,4 +246,6 @@ Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
 
     channel.send({ embeds: [embed] });
 });
+
+
 
