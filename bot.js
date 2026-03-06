@@ -13,7 +13,7 @@ const client = new Client({
     ]
 });
 
-const TOKEN = "MTQ3ODc2OTY0NDc3MTg3MjgxOA.GiOay8.t8qWQUPqfutu_wf1QDahASOn_JfM-t0goFgD8E"; 
+const TOKEN = "MTQ3ODc2OTY0NDc3MTg3MjgxOA.GLEnNc.V_jQMRs0v0Vm9uRPe1sEtcmaq-pLMSLN6FDUXk"; 
 const GUILD_ID = "1478750576408793239";
 const VERIFY_CHANNEL_ID = "1478782389248327720";
 const ADMIN_CHANNEL_ID = "1478787933350658138";
@@ -229,4 +229,4 @@ Nick Roblox: ${nick}`
 });
 
 // LOGIN
-client.login('MTQ3ODc2OTY0NDc3MTg3MjgxOA.GiOay8.t8qWQUPqfutu_wf1QDahASOn_JfM-t0goFgD8E')
+client.login('MTQ3ODc2OTY0NDc3MTg3MjgxOA.GLEnNc.V_jQMRs0v0Vm9uRPe1sEtcmaq-pLMSLN6FDUXk')
