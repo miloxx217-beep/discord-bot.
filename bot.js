@@ -203,7 +203,7 @@ Nick Roblox: ${nick}`
 
         if (value === "discord") {
             return interaction.reply({
-                content: `Regulamin Discord`
+                content: "# <:koperta:1479760548500471830> Regulamin Discord
                       1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
@@ -228,7 +228,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             return interaction.reply({
-                content: `Regulamin Roblox` 
+                content: "# <:pad:1479760675533492224> Regulamin Roblox 
                     Zakazuje się:
              1. FRP – odgrywanie nielogiczne
 2. RDM – zabijanie bez powodu
@@ -244,7 +244,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_discord") {
             return interaction.reply({
-                content: `Taryfikator Discord`
+                content: "# <:mlot:1479760749541855362> Taryfikator Discord
                      1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
 1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
@@ -269,7 +269,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_roblox") {
             return interaction.reply({
-                content: `Taryfikator Roblox`
+                content: "# <:mlot:1479760749541855362> Taryfikator Roblox
                     1. FRP – 1 dzień bana
 2. RDM – 1–3 dni bana
 3. VDM – 1–3 dni bana
