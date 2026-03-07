@@ -28,7 +28,7 @@ client.once("ready", async () => {
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-        .setTitle("✔️ Weryfikacja Roblox")
+        .setTitle("☑️ Weryfikacja Roblox")
         .setDescription(" Kliknij przycisk poniżej aby podać swój **nick Roblox (nie display name)**.")
         .setColor("Orange");
 
@@ -144,7 +144,7 @@ Nick Roblox: ${nick}`
 
         if (value === "discord") {
             interaction.reply({
-                content: `<:koperta:1479760548500471830> Regulamin Discord 
+                content: `# <:koperta:1479760548500471830> Regulamin Discord 
                 
                 1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
