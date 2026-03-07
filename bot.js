@@ -12,25 +12,41 @@ const fs = require("fs");
 // ============================
 let dowodCounter = 0;
 
-if (fs.existsSync("dowody.json")) {
-    const data = JSON.parse(fs.readFileSync("dowody.json", "utf8"));
-    dowodCounter = data.counter || 0;
+if (fs.existsSync("dowody_counter.txt")) {
+    const val = fs.readFileSync("dowody_counter.txt", "utf8").trim();
+    if (val) dowodCounter = parseInt(val, 10) || 0;
 }
 
 function saveDowodCounter() {
-    fs.writeFileSync("dowody.json", JSON.stringify({ counter: dowodCounter }));
+    fs.writeFileSync("dowody_counter.txt", String(dowodCounter));
+}
+
+// ============================
+// 🔹 LISTA UŻYTKOWNIKÓW Z DOWODEM (TXT, ID DISCORDA)
+// ============================
+let usersWithID = new Set();
+
+if (fs.existsSync("dowody.txt")) {
+    const lines = fs.readFileSync("dowody.txt", "utf8").split("\n");
+    for (const line of lines) {
+        if (line.trim().length > 0) usersWithID.add(line.trim());
+    }
+}
+
+function saveUserID(userId) {
+    fs.appendFileSync("dowody.txt", userId + "\n");
 }
 
 // ============================
 // 🔹 KONFIGURACJA
 // ============================
 const client = new Client({
-   intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
-]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
+    ]
 });
 
 const GUILD_ID = "1478750576408793239";
@@ -40,6 +56,7 @@ const WELCOME_CHANNEL_ID = "1479172496627339417";
 const URZAD_CATEGORY_ID = "1479814526588420137";
 const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";
 const DOWODY_CHANNEL_ID = "1479848426295267470";
+const EGZAMINATOR_ROLE_ID = "1479868039636844544";
 
 // ============================
 // 🔹 BOT READY
@@ -79,8 +96,8 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
     if (urzadChannel) {
         const embedUrzad = new EmbedBuilder()
             .setColor("Orange")
-            .setDescription( 
-             `# <:mod:1479847501149372467> Urząd Miejski   
+            .setDescription(
+`# <:mod:1479847501149372467> Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
@@ -118,7 +135,7 @@ Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie z
 });
 
 // ============================
-// 🔹 KOMENDY TEKSTOWE (BEZ ZMIAN)
+// 🔹 KOMENDY TEKSTOWE
 // ============================
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -200,9 +217,7 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // ============================
-        // 🔹 DOWÓD — MODAL (BEZ TICKETU)
-        // ============================
+        // DOWÓD — MODAL
         if (interaction.customId === "dowod_start") {
 
             const modal = new ModalBuilder()
@@ -243,10 +258,18 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // ============================
-        // 🔹 PRAWO JAZDY — MENU
-        // ============================
+        // PRAWO JAZDY — PANEL
         if (interaction.customId === "pj_start") {
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setTitle("🚗 Wniosek o prawo jazdy")
+                .setDescription(
+`Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
+
+🔸 **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**  
+🔸 Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
+
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("pj_kategoria")
                 .setPlaceholder("Wybierz kategorię prawa jazdy")
@@ -260,20 +283,21 @@ client.on("interactionCreate", async (interaction) => {
                 );
 
             return interaction.reply({
-                content: "Wybierz kategorię prawa jazdy:",
+                embeds: [embed],
                 components: [new ActionRowBuilder().addComponents(menu)],
                 ephemeral: true
             });
         }
 
-        // ============================
-        // 🔹 PRZYJĘCIE ZGŁOSZENIA — tylko właściciel
-        // ============================
+        // PRZYJĘCIE ZGŁOSZENIA — egzaminator lub właściciel
         if (interaction.customId === "ticket_accept") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (
+                interaction.user.id !== interaction.guild.ownerId &&
+                !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
+            ) {
                 return interaction.reply({
-                    content: "❌ Tylko właściciel serwera może przyjmować zgłoszenia.",
+                    content: "❌ Nie masz uprawnień.",
                     ephemeral: true
                 });
             }
@@ -289,7 +313,7 @@ client.on("interactionCreate", async (interaction) => {
                 new ButtonBuilder()
                     .setCustomId("ticket_close")
                     .setLabel("Zamknij ticket")
-                    .setStyle(ButtonStyle.Danger)
+                    .setStyle(ButtonStyle.Secondary)
             );
 
             await interaction.message.edit({
@@ -302,19 +326,59 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // ============================
-        // 🔹 ZAMYKANIE TICKETA — tylko właściciel
-        // ============================
+        // ZAMYKANIE TICKETA — egzaminator lub właściciel
         if (interaction.customId === "ticket_close") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (
+                interaction.user.id !== interaction.guild.ownerId &&
+                !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
+            ) {
                 return interaction.reply({
-                    content: "❌ Tylko właściciel serwera może zamykać tickety.",
+                    content: "❌ Tylko egzaminator lub właściciel serwera może zamykać tickety.",
                     ephemeral: true
                 });
             }
 
             return interaction.channel.delete();
+        }
+
+        // PYTANIE DO URZĘDU — PRZYCISK
+        if (interaction.customId === "urzad_pytanie") {
+
+            const ticket = await interaction.guild.channels.create({
+                name: `pytanie-${interaction.user.username}`,
+                type: 0,
+                parent: URZAD_CATEGORY_ID,
+                permissionOverwrites: [
+                    { id: interaction.guild.id, deny: ["ViewChannel"] },
+                    { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+                ]
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setDescription(`# ❓ Zapytanie do urzędu
+
+Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("ticket_accept")
+                    .setLabel("Przyjmij zgłoszenie")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("ticket_close")
+                    .setLabel("Zamknij ticket")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+            return interaction.reply({
+                content: "Ticket został utworzony!",
+                ephemeral: true
+            });
         }
     }
 
@@ -342,10 +406,15 @@ Nick Roblox: ${nick}`
             });
         }
 
-        // ============================
-        // 🔹 DOWÓD — WYSYŁANIE NA KANAŁ (Z NUMERACJĄ)
-        // ============================
+        // DOWÓD — tylko raz na użytkownika (TXT)
         if (interaction.customId === "dowod_modal") {
+
+            if (usersWithID.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Masz już wyrobiony dowód osobisty.",
+                    ephemeral: true
+                });
+            }
 
             const imie = interaction.fields.getTextInputValue("dowod_imie");
             const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
@@ -354,15 +423,17 @@ Nick Roblox: ${nick}`
 
             const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
 
-            // zwiększamy numer dowodu
             dowodCounter++;
             saveDowodCounter();
+
+            usersWithID.add(interaction.user.id);
+            saveUserID(interaction.user.id);
 
             if (dowodyChannel) {
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-                        `# <:koperta:1479760548500471830> Nowy dowód osobisty
+`# <:koperta:1479760548500471830> Nowy dowód osobisty  
 **Użytkownik:** ${interaction.user}
 
 **Imię:** ${imie}
@@ -384,7 +455,7 @@ Nick Roblox: ${nick}`
     }
 
     // ============================
-    // 🔹 SELECT MENU — REGULAMINY (BEZ ZMIAN)
+    // 🔹 SELECT MENU — REGULAMINY
     // ============================
     if (interaction.isStringSelectMenu()) {
         const value = interaction.values[0];
@@ -472,52 +543,12 @@ Nick Roblox: ${nick}`
             });
         }
     }
-// ============================
-// 🔹 PYTANIE DO URZĘDU — TICKET
-// ============================
-if (interaction.customId === "urzad_pytanie") {
-
-    const ticket = await interaction.guild.channels.create({
-        name: `pytanie-${interaction.user.username}`,
-        type: 0,
-        parent: URZAD_CATEGORY_ID,
-        permissionOverwrites: [
-            { id: interaction.guild.id, deny: ["ViewChannel"] },
-            { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
-            { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
-        ]
-    });
-
-    const embed = new EmbedBuilder()
-        .setColor("Orange")
-        .setDescription(`# ❓ Zapytanie do urzędu
-
-Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
-
-    const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("ticket_accept")
-            .setLabel("Przyjmij zgłoszenie")
-            .setStyle(ButtonStyle.Success),
-        new ButtonBuilder()
-            .setCustomId("ticket_close")
-            .setLabel("Zamknij ticket")
-            .setStyle(ButtonStyle.Danger)
-    );
-
-    ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
-
-    return interaction.reply({
-        content: "Ticket został utworzony!",
-        ephemeral: true
-    });
-}
 
     // ============================
     // 🔹 PRAWO JAZDY — TICKET
     // ============================
-    if (interaction.customId === "pj_kategoria") {
-        const kat = interaction.values[0];
+    if (interaction.isStringSelectMenu() && interaction.customId === "pj_kategoria") {
+        const kat = interaction.values[0]; // na razie nie używamy w tekście, ale zostawiamy jakbyś chciał kiedyś
 
         const ticket = await interaction.guild.channels.create({
             name: `prawojazdy-${interaction.user.username}`,
@@ -525,31 +556,45 @@ Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
             parent: URZAD_CATEGORY_ID,
             permissionOverwrites: [
                 { id: interaction.guild.id, deny: ["ViewChannel"] },
+
+                // Użytkownik
                 { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+
+                // Egzaminator
+                { id: EGZAMINATOR_ROLE_ID, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+
+                // Właściciel serwera
                 { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
             ]
         });
 
         const embed = new EmbedBuilder()
             .setColor("Orange")
-            .setDescription(`# 🚗 Wniosek o prawo jazdy
+            .setDescription(`# <:rakieta:1479760849835917342> Wniosek o prawo jazdy
 
-Wybrałeś kategorię **${kat}**.
+Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
+Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
 
-Podaj swoje dane, aby kontynuować.`);
+Na tym etapie nie musisz podawać żadnych dodatkowych danych.  
+Prosimy jedynie o cierpliwość — **egzaminator skontaktuje się z Tobą w ciągu 24 godzin**, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
+
+Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Ciebie godziny**, w której egzaminator może się z Tobą skontaktować.
+
+Do momentu kontaktu ze strony egzaminatora nie musisz wykonywać żadnych dodatkowych czynności.  
+Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobić to w tym ticketcie.`);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId("ticket_accept")
                 .setLabel("Przyjmij zgłoszenie")
-                .setStyle(ButtonStyle.Success),
+                .setStyle(ButtonStyle.Secondary),
             new ButtonBuilder()
                 .setCustomId("ticket_close")
                 .setLabel("Zamknij ticket")
-                .setStyle(ButtonStyle.Danger)
+                .setStyle()
         );
 
-        ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+        await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
 
         return interaction.reply({
             content: "Ticket został utworzony!",
@@ -559,7 +604,7 @@ Podaj swoje dane, aby kontynuować.`);
 });
 
 // ============================
-// 🔹 POWITANIE (BEZ ZMIAN)
+// 🔹 POWITANIE
 // ============================
 client.on("guildMemberAdd", async (member) => {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
@@ -575,5 +620,8 @@ client.on("guildMemberAdd", async (member) => {
     channel.send({ embeds: [embed] });
 });
 
-// LOGIN
+// ============================
+// 🔹 START BOTA
+// ============================
 client.login(process.env.TOKEN);
+
