@@ -5,6 +5,25 @@ const {
     InteractionType, StringSelectMenuBuilder
 } = require("discord.js");
 
+const fs = require("fs");
+
+// ============================
+// 🔹 NUMERACJA DOWODÓW
+// ============================
+let dowodCounter = 0;
+
+if (fs.existsSync("dowody.json")) {
+    const data = JSON.parse(fs.readFileSync("dowody.json", "utf8"));
+    dowodCounter = data.counter || 0;
+}
+
+function saveDowodCounter() {
+    fs.writeFileSync("dowody.json", JSON.stringify({ counter: dowodCounter }));
+}
+
+// ============================
+// 🔹 KONFIGURACJA
+// ============================
 const client = new Client({
    intents: [
     GatewayIntentBits.Guilds,
@@ -14,25 +33,24 @@ const client = new Client({
 ]
 });
 
-// ID SERWERA I KANAŁÓW
 const GUILD_ID = "1478750576408793239";
 const VERIFY_CHANNEL_ID = "1478782389248327720";
 const ADMIN_CHANNEL_ID = "1478787933350658138";
 const WELCOME_CHANNEL_ID = "1479172496627339417";
 const URZAD_CATEGORY_ID = "1479814526588420137";
-const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";   
-const DOWODY_CHANNEL_ID = "1479848426295267470";       
+const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";
+const DOWODY_CHANNEL_ID = "1479848426295267470";
 
-// BOT READY
+// ============================
+// 🔹 BOT READY
+// ============================
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
 
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) return;
 
-    // ============================
-    // 🔹 WERYFIKACJA — automatycznie
-    // ============================
+    // WERYFIKACJA
     const verifyChannel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     if (verifyChannel) {
@@ -55,17 +73,14 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
         verifyChannel.send({ embeds: [embedVerify], components: [rowVerify] });
     }
 
-    // ============================
-    // 🔹 URZĄD — automatycznie
-    // ============================
+    // URZĄD
     const urzadChannel = guild.channels.cache.get(URZAD_PANEL_CHANNEL_ID);
 
     if (urzadChannel) {
         const embedUrzad = new EmbedBuilder()
             .setColor("Orange")
-            .setDescription(
-`# <:mod:1479847501149372467> Urząd Miejski
-
+            .setDescription( 
+             `# :mod: Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
@@ -79,14 +94,13 @@ Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie z
   Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
 
 • **Zapytanie do urzędu**  
-  Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.
-`);
+  Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId("dowod_start")
                 .setLabel("Dowód osobisty")
-                .setStyle(ButtonStyle.Secondary),
+                .setStyleButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId("pj_start")
@@ -101,8 +115,6 @@ Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie z
 
         urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
     }
-
-    console.log("Panele weryfikacji i urzędu zostały wysłane!");
 });
 
 // ============================
@@ -115,7 +127,17 @@ client.on("messageCreate", async (message) => {
         const embed = new EmbedBuilder()
             .setDescription(`# <:koperta:1479760548500471830> Regulamin serwera
 
-Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.`)
+Witamy na naszym serwerze!
+
+Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
+
+Dostępne:
+• Regulamin Discord
+• Regulamin Roblox
+• Taryfikator Discord
+• Taryfikator Roblox
+
+Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
             .setColor("Orange");
 
         const button = new ButtonBuilder()
@@ -159,7 +181,7 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // REGULAMINY — OTWARCIE MENU
+        // REGULAMINY
         if (interaction.customId === "regulamin_przycisk") {
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("wybor_regulaminu")
@@ -245,7 +267,7 @@ client.on("interactionCreate", async (interaction) => {
         }
 
         // ============================
-        // 🔹 PRZYJĘCIE ZGŁOSZENIA (tylko właściciel, tylko raz)
+        // 🔹 PRZYJĘCIE ZGŁOSZENIA — tylko właściciel
         // ============================
         if (interaction.customId === "ticket_accept") {
 
@@ -281,9 +303,17 @@ client.on("interactionCreate", async (interaction) => {
         }
 
         // ============================
-        // 🔹 ZAMYKANIE TICKETA
+        // 🔹 ZAMYKANIE TICKETA — tylko właściciel
         // ============================
         if (interaction.customId === "ticket_close") {
+
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return interaction.reply({
+                    content: "❌ Tylko właściciel serwera może zamykać tickety.",
+                    ephemeral: true
+                });
+            }
+
             return interaction.channel.delete();
         }
     }
@@ -313,7 +343,7 @@ Nick Roblox: ${nick}`
         }
 
         // ============================
-        // 🔹 DOWÓD — WYSYŁANIE NA KANAŁ (BEZ TICKETU)
+        // 🔹 DOWÓD — WYSYŁANIE NA KANAŁ (Z NUMERACJĄ)
         // ============================
         if (interaction.customId === "dowod_modal") {
 
@@ -324,17 +354,23 @@ Nick Roblox: ${nick}`
 
             const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
 
+            // zwiększamy numer dowodu
+            dowodCounter++;
+            saveDowodCounter();
+
             if (dowodyChannel) {
                 const embedData = new EmbedBuilder()
-                    .setColor("Green")
-                    .setTitle("📄 Nowy dowód osobisty")
+                    .setColor("Orange")
                     .setDescription(
-`**Użytkownik:** ${interaction.user}
+                        `# <:koperta:1479760548500471830> Nowy dowód osobisty
+**Użytkownik:** ${interaction.user}
 
 **Imię:** ${imie}
 **Nazwisko:** ${nazwisko}
 **Płeć:** ${plec}
-**Obywatelstwo:** ${obywatelstwo}`
+**Obywatelstwo:** ${obywatelstwo}
+
+**Numer dowodu:** ${dowodCounter}`
                     );
 
                 dowodyChannel.send({ embeds: [embedData] });
@@ -357,7 +393,6 @@ Nick Roblox: ${nick}`
             return interaction.reply({
                 content: `# <:koperta:1479760548500471830> Regulamin Discord
 
-  1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
 1.3 Spamowanie lub floodowanie → niedozwolone.
@@ -382,7 +417,7 @@ Nick Roblox: ${nick}`
         if (value === "roblox") {
             return interaction.reply({
                 content: `# <:pad:1479760675533492224> Regulamin Roblox 
-Zakazuje się:
+
 1. FRP – odgrywanie nielogiczne  
 2. RDM – zabijanie bez powodu  
 3. VDM – zabijanie pojazdami  
@@ -399,7 +434,7 @@ Zakazuje się:
             return interaction.reply({
                 content: `# <:mlot:1479760749541855362> Taryfikator Discord
 
-  1. Zachowanie ogólne
+1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
 1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
 1.3 Spam / flood → Ostrzeżenie
@@ -447,80 +482,13 @@ Zakazuje się:
         const ticket = await interaction.guild.channels.create({
             name: `prawojazdy-${interaction.user.username}`,
             type: 0,
-            parent: URZAD_CATEGORY_ID
+            parent: URZAD_CATEGORY_ID,
+            permissionOverwrites: [
+                { id: interaction.guild.id, deny: ["ViewChannel"] },
+                { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+            ]
         });
 
         const embed = new EmbedBuilder()
             .setColor("Orange")
-            .setDescription(`# 🚗 Wniosek o prawo jazdy
-
-Wybrałeś kategorię **${kat}**.
-
-Podaj swoje dane, aby kontynuować.`);
-
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("ticket_accept")
-                .setLabel("Przyjmij zgłoszenie")
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setCustomId("ticket_close")
-                .setLabel("Zamknij ticket")
-                .setStyle(ButtonStyle.Danger)
-        );
-
-        ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
-        return interaction.reply({ content: "Ticket został utworzony!", ephemeral: true });
-    }
-
-    // ============================
-    // 🔹 PYTANIE — TICKET
-    // ============================
-    if (interaction.customId === "urzad_pytanie") {
-        const ticket = await interaction.guild.channels.create({
-            name: `pytanie-${interaction.user.username}`,
-            type: 0,
-            parent: URZAD_CATEGORY_ID
-        });
-
-        const embed = new EmbedBuilder()
-            .setColor("Orange")
-            .setDescription(`# ❓ Zapytanie do urzędu
-
-Opisz swój problem lub pytanie.`);
-
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("ticket_accept")
-                .setLabel("Przyjmij zgłoszenie")
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setCustomId("ticket_close")
-                .setLabel("Zamknij ticket")
-                .setStyle(ButtonStyle.Danger)
-        );
-
-        ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
-        return interaction.reply({ content: "Ticket został utworzony!", ephemeral: true });
-    }
-
-});
-
-// ============================
-// 🔹 POWITANIE (BEZ ZMIAN)
-// ============================
-client.on("guildMemberAdd", async (member) => {
-    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
-    if (!channel) return;
-
-    const embed = new EmbedBuilder()
-        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
-        .setColor("Orange")
-        .setThumbnail(member.user.displayAvatarURL());
-
-    channel.send({ embeds: [embed] });
-});
-
-// LOGIN
-client.login(process.env.TOKEN);
