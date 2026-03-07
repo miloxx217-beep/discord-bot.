@@ -100,7 +100,7 @@ Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie z
             new ButtonBuilder()
                 .setCustomId("dowod_start")
                 .setLabel("Dowód osobisty")
-                .setStyleButtonStyle.Secondary),
+                .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId("pj_start")
