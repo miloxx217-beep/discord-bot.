@@ -20,39 +20,72 @@ const VERIFY_CHANNEL_ID = "1478782389248327720";
 const ADMIN_CHANNEL_ID = "1478787933350658138";
 const WELCOME_CHANNEL_ID = "1479172496627339417";
 const URZAD_CATEGORY_ID = "1479814526588420137";
+const URZAD_PANEL_CHANNEL_ID = "1479789580118130869"; 
 
 // BOT READY
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
 
     const guild = client.guilds.cache.get(GUILD_ID);
-    const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
+    if (!guild) return;
 
-    const embed = new EmbedBuilder()
-        .setDescription(
+    // WERYFIKACJA
+    const verifyChannel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
+
+    if (verifyChannel) {
+        const embedVerify = new EmbedBuilder()
+            .setDescription(
 `# <:konfetti:1479760987790770288> Weryfikacja Roblox 
 
 Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.`)
-        .setColor("Orange");
+            .setColor("Orange");
 
-    const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("start_verification")
-            .setLabel("Zweryfikuj się")
-            .setStyle(ButtonStyle.Secondary)
-    );
+        const rowVerify = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("start_verification")
+                .setLabel("Zweryfikuj się")
+                .setStyle(ButtonStyle.Secondary)
+        );
 
-    if (channel) {
-        channel.send({ embeds: [embed], components: [row] });
+        verifyChannel.send({ embeds: [embedVerify], components: [rowVerify] });
     }
 
-    // REJESTRACJA KOMENDY /urzad
-    await client.application.commands.create({
-        name: "urzad",
-        description: "Otwiera panel urzędu"
-    });
+    // PANEL URZĘDU — automatycznie po starcie
+    const urzadChannel = guild.channels.cache.get(URZAD_PANEL_CHANNEL_ID);
 
-    console.log("Komenda /urzad została zarejestrowana!");
+    if (urzadChannel) {
+        const embedUrzad = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# 🏛️ Urząd Miejski
+
+Wybierz jedną z dostępnych opcji:
+
+• Dowód osobisty  
+• Prawo jazdy  
+• Zapytanie do urzędu`);
+
+        const rowUrzad = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("dowod_start")
+                .setLabel("Dowód osobisty")
+                .setStyle(ButtonStyle.Primary),
+
+            new ButtonBuilder()
+                .setCustomId("pj_start")
+                .setLabel("Prawo jazdy")
+                .setStyle(ButtonStyle.Success),
+
+            new ButtonBuilder()
+                .setCustomId("urzad_pytanie")
+                .setLabel("Zapytanie do urzędu")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
+    }
+
+    console.log("Panele weryfikacji i urzędu zostały wysłane!");
 });
 
 // KOMENDY TEKSTOWE
@@ -83,54 +116,6 @@ Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.`)
 
 // INTERAKCJE
 client.on("interactionCreate", async (interaction) => {
-
-    // ============================
-    // 🔹 KOMENDA /urzad
-    // ============================
-    if (interaction.isChatInputCommand() && interaction.commandName === "urzad") {
-
-        // tylko właściciel serwera
-        if (interaction.user.id !== interaction.guild.ownerId) {
-            return interaction.reply({
-                content: "❌ Tylko właściciel serwera może użyć tej komendy.",
-                ephemeral: true
-            });
-        }
-
-        const embed = new EmbedBuilder()
-            .setColor("Orange")
-            .setDescription(
-`# 🏛️ Urząd Miejski
-
-Wybierz jedną z dostępnych opcji:
-
-• Dowód osobisty  
-• Prawo jazdy  
-• Zapytanie do urzędu`);
-
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("dowod_start")
-                .setLabel("Dowód osobisty")
-                .setStyle(ButtonStyle.Primary),
-
-            new ButtonBuilder()
-                .setCustomId("pj_start")
-                .setLabel("Prawo jazdy")
-                .setStyle(ButtonStyle.Success),
-
-            new ButtonBuilder()
-                .setCustomId("urzad_pytanie")
-                .setLabel("Zapytanie do urzędu")
-                .setStyle(ButtonStyle.Secondary)
-        );
-
-        return interaction.reply({
-            embeds: [embed],
-            components: [row],
-            ephemeral: true
-        });
-    }
 
     // ============================
     // 🔹 PRZYCISKI
