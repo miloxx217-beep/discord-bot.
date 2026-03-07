@@ -255,6 +255,10 @@ Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
     channel.send({ embeds: [embed] });
 });
 
+client.application.commands.create({
+    name: "urzad",
+    description: "Otwiera panel urzędu"
+});
 const categoryId = "1479814526588420137";
 
 client.on("interactionCreate", async interaction => {
@@ -460,7 +464,3 @@ Opisz dokładnie swoje pytanie lub problem.`);
     }
 
 });
-
-
-
-
