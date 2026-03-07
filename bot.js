@@ -238,7 +238,7 @@ Nick Roblox: ${nick}`
 // LOGIN — BEZ TOKENA W KODZIE
 client.login(process.env.TOKEN);
 // AUTOMATYCZNE POWITANIE NOWYCH GRACZY
-const WELCOME_CHANNEL_ID = "1478787933350658138";
+const WELCOME_CHANNEL_ID = "1479172496627339417";
 
 client.on("guildMemberAdd", async (member) => {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
@@ -246,10 +246,10 @@ client.on("guildMemberAdd", async (member) => {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-        .setTitle("👋 Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności! 🎉  
+        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności! <:konfetti:1479760987790770288>  
 Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
-        .setColor("Green")
+        .setColor("Orange")
         .setThumbnail(member.user.displayAvatarURL());
 
     channel.send({ embeds: [embed] });
