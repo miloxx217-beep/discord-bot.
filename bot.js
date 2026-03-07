@@ -203,7 +203,7 @@ Nick Roblox: ${nick}`
 
         if (value === "discord") {
             return interaction.reply({
-                content: "# <:koperta:1479760548500471830> Regulamin Discord
+                content: `# <:koperta:1479760548500471830> Regulamin Discord
                       1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
@@ -221,7 +221,7 @@ Nick Roblox: ${nick}`
 4. Treści, reklama i administracja
 4.1 Materiały i linki muszą być legalne.
 4.2 Reklama bez zgody administracji jest zabroniona.
-4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.",
+4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
                 ephemeral: true
             });
         }
