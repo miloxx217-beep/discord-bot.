@@ -28,7 +28,7 @@ client.once("ready", async () => {
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-        .setTitle("<:konfetti:1479756632291410043> Weryfikacja Roblox")
+        .setTitle("# <:konfetti:1479756632291410043> Weryfikacja Roblox")
         .setDescription("Kliknij przycisk poniżej aby podać swój **nick Roblox (nie display name)**.")
         .setColor("Orange");
 
@@ -48,7 +48,7 @@ client.on("messageCreate", async (message) => {
 
     if (message.content === "!regulamin") {
         const embed = new EmbedBuilder()
-            .setTitle("<:koperta:1479753910422864064> Regulamin serwera")
+            .setTitle("# <:koperta:1479753910422864064> Regulamin serwera")
             .setDescription(`Witamy na naszym serwerze!
 
 Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
@@ -144,7 +144,7 @@ Nick Roblox: ${nick}`
 
         if (value === "discord") {
             interaction.reply({
-                content: `<:koperta:1479753910422864064> Regulamin Discord 
+                content: `# <:koperta:1479753910422864064> Regulamin Discord 
                 
                 1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
@@ -170,7 +170,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_discord") {
             interaction.reply({
-                content: `<:mlot:1479755213840580650> Taryfikator Discord 
+                content: `# <:mlot:1479755213840580650> Taryfikator Discord 
                 
                 1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
@@ -196,7 +196,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             interaction.reply({
-                content: `<:pad:1479754659857043607> Regulamin Roblox
+                content: `# <:pad:1479754659857043607> Regulamin Roblox
                 
                 1. FRP – odgrywanie nielogiczne
 2. RDM – zabijanie bez powodu
@@ -212,7 +212,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_roblox") {
             interaction.reply({
-                content: `<:mlot:1479755213840580650> Taryfikator Roblox 
+                content: `# <:mlot:1479755213840580650> Taryfikator Roblox 
                 
                 1. FRP – 1 dzień bana
 2. RDM – 1–3 dni bana
