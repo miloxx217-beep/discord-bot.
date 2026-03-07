@@ -35,7 +35,7 @@ const EGZAMINATOR_ROLE_ID = "1479868039636844544";
 const BANK_CHANNEL_ID = "1479903334751015065";
 const KANTOR_CHANNEL_ID = "1479872519799574729";
 const SKLEP_CHANNEL_ID = "1479872602930675923";
-const PRACUJ_CHANNEL_ID = "1479872708928864388";
+const PRACUJ_CHANNEL_ID = "1479872708928864388"; // kanał pracy + embed /pracuj
 
 // ROLE SKLEPU
 const PREMIUM_ROLE_ID = "1479920896759173377";
@@ -46,7 +46,7 @@ const PJ_C_ROLE_ID = "1479920339248091146";
 const PJ_D_ROLE_ID = "1479920368360755415";
 const PJ_CE_ROLE_ID = "1479920394831003892";
 
-// COOLDOWN PRACY (wiadomość "pracuj")
+// COOLDOWN PRACY (1 godzina dla /pracuj)
 const workCooldown = new Map(); // userId → timestamp
 
 // ============================
@@ -282,7 +282,7 @@ Proces wymiany waluty jest prosty i w pełni bezpieczny:
 • Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.  
 • Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.  
 
-Dziękujemy za korzystanie z usług Kantoru .`);
+Dziękujemy za korzystanie z usług Kantoru.`);
 
         const rowKantor = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -300,7 +300,7 @@ Dziękujemy za korzystanie z usług Kantoru .`);
         const embedSklep = new EmbedBuilder()
             .setColor("Orange")
             .setDescription(
-`# <:sklep:1479916476210352239> Sklep
+`# <:sklep:1479916476210352239> Sklep 
 
 Witamy w oficjalnym sklepie serwera.  
 To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla mieszkańców miasta.
@@ -327,7 +327,7 @@ Dziękujemy za korzystanie ze Sklepu.`);
 });
 
 // ============================
-// 🔹 KOMENDY TEKSTOWE
+// 🔹 KOMENDY TEKSTOWE (bez „pracuj”)
 // ============================
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -361,50 +361,7 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`);
         await message.channel.send("Pong! <:rakieta:1479760849835917342> Bot działa!");
     }
 
-    // KOMENDA TEKSTOWA "pracuj" z cooldownem 1 godzina
-    if (message.content.toLowerCase() === "pracuj") {
-
-        if (message.channel.id !== PRACUJ_CHANNEL_ID) {
-            return message.reply("❌ Komendy **pracuj** możesz używać tylko na kanale <#" + PRACUJ_CHANNEL_ID + ">.");
-        }
-
-        const account = getUserAccount(message.author.id);
-        if (!account) {
-            return message.reply("❌ Nie masz konta bankowego. Najpierw zaloguj się w kanale bank.");
-        }
-
-        const lastWork = workCooldown.get(message.author.id);
-        const now = Date.now();
-        const hour = 60 * 60 * 1000;
-
-        if (lastWork && now - lastWork < hour) {
-            const remaining = hour - (now - lastWork);
-            const minutes = Math.ceil(remaining / 60000);
-
-            return message.reply(`⏳ Możesz ponownie pracować za **${minutes} minut**.`);
-        }
-
-        workCooldown.set(message.author.id, now);
-
-        const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
-
-        const data = loadBankData();
-        data[message.author.id].balance += amount;
-        saveBankData(data);
-
-        const embed = new EmbedBuilder()
-            .setColor("Orange")
-            .setTitle("🛠️ Praca wykonana!")
-            .setDescription(
-                `**${message.author} wykonał pracę!**  
-
-💵 Otrzymał: **${amount} $**  
-💰 Nowe saldo: **${data[message.author.id].balance} $**`
-            )
-            .setThumbnail(message.author.displayAvatarURL());
-
-        return message.channel.send({ embeds: [embed] });
-    }
+    // UWAGA: brak komendy tekstowej "pracuj" — jest tylko /pracuj
 });
 
 // ============================
@@ -536,7 +493,7 @@ client.on("interactionCreate", async (interaction) => {
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# <:pad:1479760675533492224> Pytanie do administracji
+`# <:mlot:1479760749541855362> Pytanie do administracji
 
 Witaj w oficjalnym ticketcie Urzędu Miejskiego.  
 To miejsce służy do zgłaszania wszelkich pytań, problemów oraz spraw wymagających interwencji administracji.
@@ -554,7 +511,7 @@ Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze
 • Zachowaj kulturę wypowiedzi.  
 • Nie spamuj wiadomościami — każda sprawa zostanie zauważona.  
 
-Dziękujemy za kontakt z Urzędem Miejskim.`);
+Dziękujemy za kontakt z Urzędem.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -758,7 +715,7 @@ Dziękujemy za kontakt z Urzędem Miejskim.`);
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# 💱 Kantor — wymiana waluty
+`# <:konfetti:1479760987790770288> Kantor — wymiana waluty
 
 Aby wymienić walutę:
 1. Postępuj zgodnie z instrukcjami podanymi przez administrację w tym ticketcie.
@@ -842,7 +799,7 @@ Nick Roblox: ${nick}`
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# <:koperta:1479760548500471830> Nowy dowód osobisty  
+`# 📄 Nowy dowód osobisty  
 **Użytkownik:** ${interaction.user}
 
 **Imię:** ${imie}
@@ -1110,7 +1067,7 @@ Nick Roblox: ${nick}`
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# <:mlot:1479760749541855362> Wniosek o prawo jazdy
+`# <:koperta:1479760548500471830> Wniosek o prawo jazdy
 
 Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
 Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
@@ -1211,15 +1168,8 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
     // ---------- SLASH KOMENDY ----------
     if (interaction.isChatInputCommand()) {
 
-        // /pracuj (ephemeral, bez cooldownu)
+        // /pracuj — publiczny embed na kanale PRACUJ_CHANNEL_ID + cooldown 1 godzina
         if (interaction.commandName === "pracuj") {
-
-            if (interaction.channelId !== PRACUJ_CHANNEL_ID) {
-                return interaction.reply({
-                    content: "❌ Komendy **/pracuj** możesz używać tylko na kanale <#" + PRACUJ_CHANNEL_ID + ">.",
-                    ephemeral: true
-                });
-            }
 
             const account = getUserAccount(interaction.user.id);
             if (!account) {
@@ -1229,15 +1179,53 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
                 });
             }
 
+            // COOLDOWN 1 GODZINA
+            const lastWork = workCooldown.get(interaction.user.id);
+            const now = Date.now();
+            const hour = 60 * 60 * 1000;
+
+            if (lastWork && now - lastWork < hour) {
+                const remaining = hour - (now - lastWork);
+                const minutes = Math.ceil(remaining / 60000);
+
+                return interaction.reply({
+                    content: `⏳ Możesz ponownie pracować za **${minutes} minut**.`,
+                    ephemeral: true
+                });
+            }
+
+            // zapis cooldownu
+            workCooldown.set(interaction.user.id, now);
+
+            // losowanie zarobku
             const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
 
+            // zapis do banku
             const data = loadBankData();
             data[interaction.user.id].balance += amount;
             saveBankData(data);
 
+            // embed publiczny na kanale PRACUJ_CHANNEL_ID
+            const guild = interaction.guild;
+            const workChannel = guild.channels.cache.get(PRACUJ_CHANNEL_ID);
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setTitle("🛠️ Praca wykonana!")
+                .setDescription(
+                    `**${interaction.user} wykonał pracę!**  
+
+💵 Otrzymał: **${amount} $**  
+💰 Nowe saldo: **${data[interaction.user.id].balance} $**`
+                )
+                .setThumbnail(interaction.user.displayAvatarURL());
+
+            if (workChannel) {
+                await workChannel.send({ embeds: [embed] });
+            }
+
             return interaction.reply({
-                content: `🛠️ Pracowałeś i zarobiłeś **${amount} $**.  
-💰 Twoje nowe saldo: **${data[interaction.user.id].balance} $**`,
+                content: "✅ Twoja praca została zarejestrowana. Sprawdź kanał pracy, aby zobaczyć embed.",
                 ephemeral: true
             });
         }
