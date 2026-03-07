@@ -4,7 +4,6 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     InteractionType, StringSelectMenuBuilder
 } = require("discord.js");
-
 const fs = require("fs");
 
 // ============================
@@ -22,7 +21,7 @@ function saveDowodCounter() {
 }
 
 // ============================
-// 🔹 LISTA UŻYTKOWNIKÓW Z DOWODEM (TXT, ID DISCORDA)
+// 🔹 LISTA UŻYTKOWNIKÓW Z DOWODEM
 // ============================
 let usersWithID = new Set();
 
@@ -59,7 +58,7 @@ const DOWODY_CHANNEL_ID = "1479848426295267470";
 const EGZAMINATOR_ROLE_ID = "1479868039636844544";
 
 // ============================
-// 🔹 BOT READY
+// 🔹 READY
 // ============================
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
@@ -69,16 +68,15 @@ client.once("ready", async () => {
 
     // WERYFIKACJA
     const verifyChannel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
-
     if (verifyChannel) {
         const embedVerify = new EmbedBuilder()
+            .setColor("Orange")
             .setDescription(
 `# <:konfetti:1479760987790770288> Weryfikacja Roblox 
 
 Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.
 Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.
-Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.`)
-            .setColor("Orange");
+Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.`);
 
         const rowVerify = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -87,12 +85,11 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
                 .setStyle(ButtonStyle.Secondary)
         );
 
-        verifyChannel.send({ embeds: [embedVerify], components: [rowVerify] });
+        await verifyChannel.send({ embeds: [embedVerify], components: [rowVerify] });
     }
 
     // URZĄD
     const urzadChannel = guild.channels.cache.get(URZAD_PANEL_CHANNEL_ID);
-
     if (urzadChannel) {
         const embedUrzad = new EmbedBuilder()
             .setColor("Orange")
@@ -100,37 +97,34 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
 `# <:mod:1479847501149372467> Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
-Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
+Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze.
 
 • **Dowód osobisty**  
-  Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
+  Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego.
 
 • **Prawo jazdy**  
   Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.  
-  **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**  
-  Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
+  **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**
 
 • **Zapytanie do urzędu**  
-  Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
+  Jeśli masz pytanie lub sprawę do administracji, wybierz tę opcję.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId("dowod_start")
                 .setLabel("Dowód osobisty")
                 .setStyle(ButtonStyle.Secondary),
-
             new ButtonBuilder()
                 .setCustomId("pj_start")
                 .setLabel("Prawo jazdy")
                 .setStyle(ButtonStyle.Secondary),
-
             new ButtonBuilder()
                 .setCustomId("urzad_pytanie")
                 .setLabel("Zapytanie do urzędu")
                 .setStyle(ButtonStyle.Secondary)
         );
 
-        urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
+        await urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
     }
 });
 
@@ -142,9 +136,9 @@ client.on("messageCreate", async (message) => {
 
     if (message.content === "!regulamin") {
         const embed = new EmbedBuilder()
-            .setDescription(`# <:koperta:1479760548500471830> Regulamin serwera
-
-Witamy na naszym serwerze!
+            .setColor("Orange")
+            .setDescription(
+`# <:koperta:1479760548500471830> Regulamin serwera
 
 Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
 
@@ -154,8 +148,7 @@ Dostępne:
 • Taryfikator Discord
 • Taryfikator Roblox
 
-Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
-            .setColor("Orange");
+Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`);
 
         const button = new ButtonBuilder()
             .setCustomId("regulamin_przycisk")
@@ -163,12 +156,11 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
             .setStyle(ButtonStyle.Secondary);
 
         const row = new ActionRowBuilder().addComponents(button);
-
-        message.channel.send({ embeds: [embed], components: [row] });
+        await message.channel.send({ embeds: [embed], components: [row] });
     }
 
     if (message.content === "!ping") {
-        message.channel.send("Pong! <:rakieta:1479760849835917342> Bot działa!");
+        await message.channel.send("Pong! <:rakieta:1479760849835917342> Bot działa!");
     }
 });
 
@@ -177,9 +169,7 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
 // ============================
 client.on("interactionCreate", async (interaction) => {
 
-    // ============================
-    // 🔹 PRZYCISKI
-    // ============================
+    // ---------- PRZYCISKI ----------
     if (interaction.isButton()) {
 
         // WERYFIKACJA
@@ -198,17 +188,17 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // REGULAMINY
+        // REGULAMINY — OTWARCIE MENU
         if (interaction.customId === "regulamin_przycisk") {
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("wybor_regulaminu")
                 .setPlaceholder("Wybierz regulamin")
-                .addOptions([
+                .addOptions(
                     { label: "Regulamin Discord", value: "discord" },
                     { label: "Regulamin Roblox", value: "roblox" },
                     { label: "Taryfikator Discord", value: "taryfikator_discord" },
                     { label: "Taryfikator Roblox", value: "taryfikator_roblox" }
-                ]);
+                );
 
             return interaction.reply({
                 content: "Wybierz co chcesz przeczytać:",
@@ -219,7 +209,6 @@ client.on("interactionCreate", async (interaction) => {
 
         // DOWÓD — MODAL
         if (interaction.customId === "dowod_start") {
-
             const modal = new ModalBuilder()
                 .setCustomId("dowod_modal")
                 .setTitle("Wniosek o dowód osobisty");
@@ -260,7 +249,6 @@ client.on("interactionCreate", async (interaction) => {
 
         // PRAWO JAZDY — PANEL
         if (interaction.customId === "pj_start") {
-
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setTitle("🚗 Wniosek o prawo jazdy")
@@ -289,9 +277,47 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
+        // PYTANIE DO URZĘDU — TICKET
+        if (interaction.customId === "urzad_pytanie") {
+            const ticket = await interaction.guild.channels.create({
+                name: `pytanie-${interaction.user.username}`,
+                type: 0,
+                parent: URZAD_CATEGORY_ID,
+                permissionOverwrites: [
+                    { id: interaction.guild.id, deny: ["ViewChannel"] },
+                    { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+                ]
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setDescription(
+`# ❓ Zapytanie do urzędu
+
+Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("ticket_accept")
+                    .setLabel("Przyjmij zgłoszenie")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("ticket_close")
+                    .setLabel("Zamknij ticket")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+            return interaction.reply({
+                content: "Ticket został utworzony!",
+                ephemeral: true
+            });
+        }
+
         // PRZYJĘCIE ZGŁOSZENIA — egzaminator lub właściciel
         if (interaction.customId === "ticket_accept") {
-
             if (
                 interaction.user.id !== interaction.guild.ownerId &&
                 !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
@@ -316,9 +342,7 @@ client.on("interactionCreate", async (interaction) => {
                     .setStyle(ButtonStyle.Secondary)
             );
 
-            await interaction.message.edit({
-                components: [newRow]
-            });
+            await interaction.message.edit({ components: [newRow] });
 
             return interaction.reply({
                 content: `✔️ Zgłoszenie zostało przyjęte przez ${interaction.user}.`,
@@ -328,7 +352,6 @@ client.on("interactionCreate", async (interaction) => {
 
         // ZAMYKANIE TICKETA — egzaminator lub właściciel
         if (interaction.customId === "ticket_close") {
-
             if (
                 interaction.user.id !== interaction.guild.ownerId &&
                 !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
@@ -341,26 +364,199 @@ client.on("interactionCreate", async (interaction) => {
 
             return interaction.channel.delete();
         }
+    }
 
-        // PYTANIE DO URZĘDU — PRZYCISK
-        if (interaction.customId === "urzad_pytanie") {
+    // ---------- MODALE ----------
+    if (interaction.type === InteractionType.ModalSubmit) {
 
+        // WERYFIKACJA
+        if (interaction.customId === "verification_modal") {
+            const nick = interaction.fields.getTextInputValue("roblox_nick");
+            const adminChannel = interaction.guild.channels.cache.get(ADMIN_CHANNEL_ID);
+
+            if (adminChannel) {
+                await adminChannel.send(
+`<:osoba:1479761131206611078> **Nowa weryfikacja**
+Użytkownik: ${interaction.user.tag}
+Nick Roblox: ${nick}`
+                );
+            }
+
+            return interaction.reply({
+                content: "Twój nick został wysłany do weryfikacji <:ptaszek:1479761065850962020>",
+                ephemeral: true
+            });
+        }
+
+        // DOWÓD — tylko raz
+        if (interaction.customId === "dowod_modal") {
+            if (usersWithID.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Masz już wyrobiony dowód osobisty.",
+                    ephemeral: true
+                });
+            }
+
+            const imie = interaction.fields.getTextInputValue("dowod_imie");
+            const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
+            const plec = interaction.fields.getTextInputValue("dowod_plec");
+            const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
+
+            const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
+
+            dowodCounter++;
+            saveDowodCounter();
+            usersWithID.add(interaction.user.id);
+            saveUserID(interaction.user.id);
+
+            if (dowodyChannel) {
+                const embedData = new EmbedBuilder()
+                    .setColor("Orange")
+                    .setDescription(
+`# 📄 Nowy dowód osobisty  
+**Użytkownik:** ${interaction.user}
+
+**Imię:** ${imie}
+**Nazwisko:** ${nazwisko}
+**Płeć:** ${plec}
+**Obywatelstwo:** ${obywatelstwo}
+
+**Numer dowodu:** ${dowodCounter}`);
+
+                await dowodyChannel.send({ embeds: [embedData] });
+            }
+
+            return interaction.reply({
+                content: "Twój wniosek o dowód został wysłany!",
+                ephemeral: true
+            });
+        }
+    }
+
+    // ---------- SELECT MENU ----------
+    if (interaction.isStringSelectMenu()) {
+
+        // REGULAMINY
+        if (interaction.customId === "wybor_regulaminu") {
+            const value = interaction.values[0];
+
+            if (value === "discord") {
+                return interaction.reply({
+                    content:
+`# <:koperta:1479760548500471830> Regulamin Discord
+
+1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
+1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
+1.3 Spamowanie lub floodowanie → niedozwolone.
+
+2. Roleplay / Postacie
+2.1 Odgrywaj swoją postać spójnie i logicznie.
+2.2 Tworzenie postaci powinno być zgodne z zasadami serwera.
+
+3. Kanały i komunikacja
+3.1 Korzystaj z kanałów zgodnie z ich przeznaczeniem.
+3.2 Zachowuj kulturę na kanałach głosowych.
+3.3 Nie publikuj treści NSFW ani materiałów nielegalnych.
+
+4. Treści, reklama i administracja
+4.1 Materiały i linki muszą być legalne.
+4.2 Reklama bez zgody administracji jest zabroniona.
+4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "roblox") {
+                return interaction.reply({
+                    content:
+`# <:pad:1479760675533492224> Regulamin Roblox 
+
+1. FRP – odgrywanie nielogiczne  
+2. RDM – zabijanie bez powodu  
+3. VDM – zabijanie pojazdami  
+4. Power Gaming  
+5. Meta Gaming  
+6. Cheaty / Exploity  
+7. Podszywanie się pod administrację  
+8. Reklama / linki phishingowe`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "taryfikator_discord") {
+                return interaction.reply({
+                    content:
+`# <:mlot:1479760749541855362> Taryfikator Discord
+
+1. Zachowanie ogólne
+1.1 Obraźliwe zachowanie → Ostrzeżenie
+1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
+1.3 Spam / flood → Ostrzeżenie
+
+2. Roleplay / Postacie
+2.1 Nieprzestrzeganie zasad RP → Ostrzeżenie
+2.2 Tworzenie postaci niezgodnie z zasadami → Ostrzeżenie
+
+3. Kanały i komunikacja
+3.1 Nieodpowiednie użycie kanałów → Tymczasowe wyciszenie
+3.2 Zakłócanie rozmów głosowych → Ostrzeżenie
+3.3 Publikowanie treści NSFW / nielegalnych → PERMANENTNY BAN
+
+4. Treści i materiały / Reklama / Administracja
+4.1 Udostępnianie nielegalnych linków → PERMANENTNY BAN
+4.2 Nieautoryzowana reklama → PERMANENTNY BAN
+4.3 Lekceważenie poleceń administracji → Ostrzeżenie / czasowy ban`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "taryfikator_roblox") {
+                return interaction.reply({
+                    content:
+`# <:mlot:1479760749541855362> Taryfikator Roblox
+
+1. FRP – 1 dzień bana  
+2. RDM – 1–3 dni bana  
+3. VDM – 1–3 dni bana  
+4. Power Gaming – 3 dni bana  
+5. Meta Gaming – 3 dni bana  
+6. Cheaty / Exploity – PERMANENTNY BAN  
+7. Podszywanie się pod administrację – 7 dni bana  
+8. Reklama / linki phishingowe – PERMANENTNY BAN`,
+                    ephemeral: true
+                });
+            }
+        }
+
+        // PRAWO JAZDY — TICKET
+        if (interaction.customId === "pj_kategoria") {
             const ticket = await interaction.guild.channels.create({
-                name: `pytanie-${interaction.user.username}`,
+                name: `prawojazdy-${interaction.user.username}`,
                 type: 0,
                 parent: URZAD_CATEGORY_ID,
                 permissionOverwrites: [
                     { id: interaction.guild.id, deny: ["ViewChannel"] },
                     { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: EGZAMINATOR_ROLE_ID, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
                     { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
                 ]
             });
 
             const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setDescription(`# ❓ Zapytanie do urzędu
+                .setDescription(
+`# 🚗 Wniosek o prawo jazdy
 
-Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
+Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
+Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
+
+Na tym etapie nie musisz podawać żadnych dodatkowych danych.  
+Prosimy jedynie o cierpliwość — **egzaminator skontaktuje się z Tobą w ciągu 24 godzin**, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
+
+Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Ciebie godziny**, w której egzaminator może się z Tobą skontaktować.
+
+Do momentu kontaktu ze strony egzaminatora nie musisz wykonywać żadnych dodatkowych czynności.  
+Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobić to w tym ticketcie.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -381,226 +577,6 @@ Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
             });
         }
     }
-
-    // ============================
-    // 🔹 MODALE
-    // ============================
-    if (interaction.type === InteractionType.ModalSubmit) {
-
-        // WERYFIKACJA
-        if (interaction.customId === "verification_modal") {
-            const nick = interaction.fields.getTextInputValue("roblox_nick");
-            const adminChannel = interaction.guild.channels.cache.get(ADMIN_CHANNEL_ID);
-
-            if (adminChannel) {
-                adminChannel.send(
-`<:osoba:1479761131206611078> **Nowa weryfikacja**
-Użytkownik: ${interaction.user.tag}
-Nick Roblox: ${nick}`
-                );
-            }
-
-            return interaction.reply({
-                content: "Twój nick został wysłany do weryfikacji <:ptaszek:1479761065850962020>",
-                ephemeral: true
-            });
-        }
-
-        // DOWÓD — tylko raz na użytkownika (TXT)
-        if (interaction.customId === "dowod_modal") {
-
-            if (usersWithID.has(interaction.user.id)) {
-                return interaction.reply({
-                    content: "❌ Masz już wyrobiony dowód osobisty.",
-                    ephemeral: true
-                });
-            }
-
-            const imie = interaction.fields.getTextInputValue("dowod_imie");
-            const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
-            const plec = interaction.fields.getTextInputValue("dowod_plec");
-            const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
-
-            const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
-
-            dowodCounter++;
-            saveDowodCounter();
-
-            usersWithID.add(interaction.user.id);
-            saveUserID(interaction.user.id);
-
-            if (dowodyChannel) {
-                const embedData = new EmbedBuilder()
-                    .setColor("Orange")
-                    .setDescription(
-`# <:koperta:1479760548500471830> Nowy dowód osobisty  
-**Użytkownik:** ${interaction.user}
-
-**Imię:** ${imie}
-**Nazwisko:** ${nazwisko}
-**Płeć:** ${plec}
-**Obywatelstwo:** ${obywatelstwo}
-
-**Numer dowodu:** ${dowodCounter}`
-                    );
-
-                dowodyChannel.send({ embeds: [embedData] });
-            }
-
-            return interaction.reply({
-                content: "Twój wniosek o dowód został wysłany!",
-                ephemeral: true
-            });
-        }
-    }
-
-    // ============================
-    // 🔹 SELECT MENU — REGULAMINY
-    // ============================
-    if (interaction.isStringSelectMenu()) {
-        const value = interaction.values[0];
-
-        if (value === "discord") {
-            return interaction.reply({
-                content: `# <:koperta:1479760548500471830> Regulamin Discord
-
-1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
-1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
-1.3 Spamowanie lub floodowanie → niedozwolone.
-
-2. Roleplay / Postacie
-2.1 Odgrywaj swoją postać spójnie i logicznie.
-2.2 Tworzenie postaci powinno być zgodne z zasadami serwera.
-
-3. Kanały i komunikacja
-3.1 Korzystaj z kanałów zgodnie z ich przeznaczeniem.
-3.2 Zachowuj kulturę na kanałach głosowych.
-3.3 Nie publikuj treści NSFW ani materiałów nielegalnych.
-
-4. Treści, reklama i administracja
-4.1 Materiały i linki muszą być legalne.
-4.2 Reklama bez zgody administracji jest zabroniona.
-4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
-                ephemeral: true
-            });
-        }
-
-        if (value === "roblox") {
-            return interaction.reply({
-                content: `# <:pad:1479760675533492224> Regulamin Roblox 
-
-1. FRP – odgrywanie nielogiczne  
-2. RDM – zabijanie bez powodu  
-3. VDM – zabijanie pojazdami  
-4. Power Gaming  
-5. Meta Gaming  
-6. Cheaty / Exploity  
-7. Podszywanie się pod administrację  
-8. Reklama / linki phishingowe`,
-                ephemeral: true
-            });
-        }
-
-        if (value === "taryfikator_discord") {
-            return interaction.reply({
-                content: `# <:mlot:1479760749541855362> Taryfikator Discord
-
-1. Zachowanie ogólne
-1.1 Obraźliwe zachowanie → Ostrzeżenie
-1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
-1.3 Spam / flood → Ostrzeżenie
-
-2. Roleplay / Postacie
-2.1 Nieprzestrzeganie zasad RP → Ostrzeżenie
-2.2 Tworzenie postaci niezgodnie z zasadami → Ostrzeżenie
-
-3. Kanały i komunikacja
-3.1 Nieodpowiednie użycie kanałów → Tymczasowe wyciszenie
-3.2 Zakłócanie rozmów głosowych → Ostrzeżenie
-3.3 Publikowanie treści NSFW / nielegalnych → PERMANENTNY BAN
-
-4. Treści i materiały / Reklama / Administracja
-4.1 Udostępnianie nielegalnych linków → PERMANENTNY BAN
-4.2 Nieautoryzowana reklama → PERMANENTNY BAN
-4.3 Lekceważenie poleceń administracji → Ostrzeżenie / czasowy ban`,
-                ephemeral: true
-            });
-        }
-
-        if (value === "taryfikator_roblox") {
-            return interaction.reply({
-                content: `# <:mlot:1479760749541855362> Taryfikator Roblox
-
-1. FRP – 1 dzień bana  
-2. RDM – 1–3 dni bana  
-3. VDM – 1–3 dni bana  
-4. Power Gaming – 3 dni bana  
-5. Meta Gaming – 3 dni bana  
-6. Cheaty / Exploity – PERMANENTNY BAN  
-7. Podszywanie się pod administrację – 7 dni bana  
-8. Reklama / linki phishingowe – PERMANENTNY BAN`,
-                ephemeral: true
-            });
-        }
-    }
-
-    // ============================
-    // 🔹 PRAWO JAZDY — TICKET
-    // ============================
-    if (interaction.isStringSelectMenu() && interaction.customId === "pj_kategoria") {
-        const kat = interaction.values[0]; // na razie nie używamy w tekście, ale zostawiamy jakbyś chciał kiedyś
-
-        const ticket = await interaction.guild.channels.create({
-            name: `prawojazdy-${interaction.user.username}`,
-            type: 0,
-            parent: URZAD_CATEGORY_ID,
-            permissionOverwrites: [
-                { id: interaction.guild.id, deny: ["ViewChannel"] },
-
-                // Użytkownik
-                { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
-
-                // Egzaminator
-                { id: EGZAMINATOR_ROLE_ID, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
-
-                // Właściciel serwera
-                { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
-            ]
-        });
-
-        const embed = new EmbedBuilder()
-            .setColor("Orange")
-            .setDescription(`# <:rakieta:1479760849835917342> Wniosek o prawo jazdy
-
-Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
-Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
-
-Na tym etapie nie musisz podawać żadnych dodatkowych danych.  
-Prosimy jedynie o cierpliwość — **egzaminator skontaktuje się z Tobą w ciągu 24 godzin**, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
-
-Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Ciebie godziny**, w której egzaminator może się z Tobą skontaktować.
-
-Do momentu kontaktu ze strony egzaminatora nie musisz wykonywać żadnych dodatkowych czynności.  
-Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobić to w tym ticketcie.`);
-
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("ticket_accept")
-                .setLabel("Przyjmij zgłoszenie")
-                .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setCustomId("ticket_close")
-                .setLabel("Zamknij ticket")
-                .setStyle()
-        );
-
-        await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
-
-        return interaction.reply({
-            content: "Ticket został utworzony!",
-            ephemeral: true
-        });
-    }
 });
 
 // ============================
@@ -611,17 +587,15 @@ client.on("guildMemberAdd", async (member) => {
     if (!channel) return;
 
     const embed = new EmbedBuilder()
-        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!<:konfetti:1479760987790770288>
-        Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
         .setColor("Orange")
+        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
         .setThumbnail(member.user.displayAvatarURL());
 
-    channel.send({ embeds: [embed] });
+    await channel.send({ embeds: [embed] });
 });
 
 // ============================
 // 🔹 START BOTA
 // ============================
 client.login(process.env.TOKEN);
-
