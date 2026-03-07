@@ -2,12 +2,44 @@ const {
     Client, GatewayIntentBits, EmbedBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
     ModalBuilder, TextInputBuilder, TextInputStyle,
-    InteractionType, StringSelectMenuBuilder
+    InteractionType, StringSelectMenuBuilder,
+    Partials
 } = require("discord.js");
 const fs = require("fs");
 
 // ============================
-// 🔹 NUMERACJA DOWODÓW
+// 🔹 KONFIGURACJA BOTA
+// ============================
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
+    ],
+    partials: [Partials.Channel]
+});
+
+// ============================
+// 🔹 KONFIGURACJA SERWERA
+// ============================
+const GUILD_ID = "1478750576408793239";
+const VERIFY_CHANNEL_ID = "1478782389248327720";
+const ADMIN_CHANNEL_ID = "1478787933350658138";
+const WELCOME_CHANNEL_ID = "1479172496627339417";
+const URZAD_CATEGORY_ID = "1479814526588420137";
+const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";
+const DOWODY_CHANNEL_ID = "1479848426295267470";
+const EGZAMINATOR_ROLE_ID = "1479868039636844544";
+
+// EKONOMIA — KANAŁY
+const BANK_CHANNEL_ID = "1479903334751015065";
+const KANTOR_CHANNEL_ID = "1479872519799574729";
+const SKLEP_CHANNEL_ID = "1479872602930675923";
+const PRACUJ_CHANNEL_ID = "1479872708928864388";
+
+// ============================
+// 🔹 DOWODY — NUMERACJA I LISTA
 // ============================
 let dowodCounter = 0;
 
@@ -20,9 +52,6 @@ function saveDowodCounter() {
     fs.writeFileSync("dowody_counter.txt", String(dowodCounter));
 }
 
-// ============================
-// 🔹 LISTA UŻYTKOWNIKÓW Z DOWODEM
-// ============================
 let usersWithID = new Set();
 
 if (fs.existsSync("dowody.txt")) {
@@ -37,25 +66,42 @@ function saveUserID(userId) {
 }
 
 // ============================
-// 🔹 KONFIGURACJA
+// 🔹 EKONOMIA — BANK (TXT)
 // ============================
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers
-    ]
-});
+const BANK_FILE = "bank.txt"; // format: userId|pin|balance
 
-const GUILD_ID = "1478750576408793239";
-const VERIFY_CHANNEL_ID = "1478782389248327720";
-const ADMIN_CHANNEL_ID = "1478787933350658138";
-const WELCOME_CHANNEL_ID = "1479172496627339417";
-const URZAD_CATEGORY_ID = "1479814526588420137";
-const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";
-const DOWODY_CHANNEL_ID = "1479848426295267470";
-const EGZAMINATOR_ROLE_ID = "1479868039636844544";
+const loggedInUsers = new Set();
+
+function loadBankData() {
+    if (!fs.existsSync(BANK_FILE)) return {};
+    const lines = fs.readFileSync(BANK_FILE, "utf8").split("\n");
+    const data = {};
+    for (const line of lines) {
+        if (!line.trim()) continue;
+        const [id, pin, balance] = line.split("|");
+        data[id] = { pin, balance: Number(balance) || 0 };
+    }
+    return data;
+}
+
+function saveBankData(data) {
+    const lines = [];
+    for (const id in data) {
+        lines.push(`${id}|${data[id].pin}|${data[id].balance}`);
+    }
+    fs.writeFileSync(BANK_FILE, lines.join("\n"));
+}
+
+function getUserAccount(userId) {
+    const data = loadBankData();
+    return data[userId] || null;
+}
+
+function setUserAccount(userId, pin, balance) {
+    const data = loadBankData();
+    data[userId] = { pin, balance };
+    saveBankData(data);
+}
 
 // ============================
 // 🔹 READY
@@ -97,18 +143,17 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
 `# <:mod:1479847501149372467> Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
-Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
+Poniżej znajdziesz trzy główne sekcje:
 
-• Dowód osobisty
-Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
+• **Dowód osobisty**  
+  Złóż wniosek o wydanie dowodu osobistego.
 
-• Prawo jazdy
-Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
-Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
-Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
+• **Prawo jazdy**  
+  Złóż wniosek o prawo jazdy w wybranej kategorii.  
+  **Wymagane jest wcześniejsze zakupienie prawa jazdy w sklepie serwera.**
 
-• Zapytanie do urzędu
-Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
+• **Zapytanie do urzędu**  
+  Masz pytanie lub sprawę do administracji? Otwórz ticket.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -126,6 +171,77 @@ Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą ind
         );
 
         await urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
+    }
+
+    // BANK
+    const bankChannel = guild.channels.cache.get(BANK_CHANNEL_ID);
+    if (bankChannel) {
+        const embedBank = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# <:mlot:1479760749541855362> Bank
+
+Witaj w banku.  
+Tutaj możesz:
+• sprawdzić swoje saldo,  
+• przelać pieniądze innemu graczowi.
+
+Aby skorzystać z usług banku, zaloguj się przyciskiem poniżej.  
+Jeśli nie masz jeszcze konta, utworzysz 4-cyfrowy PIN.`);
+
+        const rowBank = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("bank_login")
+                .setLabel("Zaloguj się")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await bankChannel.send({ embeds: [embedBank], components: [rowBank] });
+    }
+
+    // KANTOR
+    const kantorChannel = guild.channels.cache.get(KANTOR_CHANNEL_ID);
+    if (kantorChannel) {
+        const embedKantor = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# 💱 Kantor
+
+Jeśli chcesz wymienić walutę:
+
+• 8000€ w grze = 4000$ na serwerze  
+
+Kliknij przycisk poniżej, aby otworzyć ticket wymiany.  
+W ticketcie znajdziesz mój nick Roblox: **kaloszek77** — musisz przelać mi pieniądze w grze, aby otrzymać walutę na serwerze.`);
+
+        const rowKantor = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("kantor_wymiana")
+                .setLabel("Wymień walutę")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await kantorChannel.send({ embeds: [embedKantor], components: [rowKantor] });
+    }
+
+    // SKLEP
+    const sklepChannel = guild.channels.cache.get(SKLEP_CHANNEL_ID);
+    if (sklepChannel) {
+        const embedSklep = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# 🛒 Sklep
+
+Jeśli chcesz coś kupić, kliknij przycisk poniżej i wybierz interesujący Cię produkt.`);
+
+        const rowSklep = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("sklep_open")
+                .setLabel("Otwórz sklep")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await sklepChannel.send({ embeds: [embedSklep], components: [rowSklep] });
     }
 });
 
@@ -252,7 +368,7 @@ client.on("interactionCreate", async (interaction) => {
         if (interaction.customId === "pj_start") {
             const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setTitle("🚗 Wniosek o prawo jazdy")
+                .setTitle("<:koperta:1479760548500471830> Wniosek o prawo jazdy")
                 .setDescription(
 `Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
 
@@ -365,6 +481,179 @@ Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
 
             return interaction.channel.delete();
         }
+
+        // BANK — LOGOWANIE / TWORZENIE KONTA
+        if (interaction.customId === "bank_login") {
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                const modal = new ModalBuilder()
+                    .setCustomId("bank_create_modal")
+                    .setTitle("Utwórz konto bankowe");
+
+                const pinInput = new TextInputBuilder()
+                    .setCustomId("bank_pin")
+                    .setLabel("Ustaw 4-cyfrowy PIN")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
+                return interaction.showModal(modal);
+            } else {
+                const modal = new ModalBuilder()
+                    .setCustomId("bank_login_modal")
+                    .setTitle("Logowanie do banku");
+
+                const pinInput = new TextInputBuilder()
+                    .setCustomId("bank_pin_login")
+                    .setLabel("Podaj swój 4-cyfrowy PIN")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
+                return interaction.showModal(modal);
+            }
+        }
+
+        // BANK — MENU
+        if (interaction.customId === "bank_menu") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_saldo")
+                    .setLabel("Sprawdź saldo")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("bank_przelew")
+                    .setLabel("Przelej pieniądze")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "Wybierz operację:",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // BANK — SALDO
+        if (interaction.customId === "bank_saldo") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(interaction.user.id);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            return interaction.reply({
+                content: `💰 Twoje saldo: **${account.balance} $**`,
+                ephemeral: true
+            });
+        }
+
+        // BANK — PRZELEW (MODAL)
+        if (interaction.customId === "bank_przelew") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("bank_transfer_modal")
+                .setTitle("Przelew bankowy");
+
+            const targetInput = new TextInputBuilder()
+                .setCustomId("bank_transfer_target")
+                .setLabel("Podaj @użytkownika lub jego ID")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const amountInput = new TextInputBuilder()
+                .setCustomId("bank_transfer_amount")
+                .setLabel("Kwota przelewu")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(targetInput),
+                new ActionRowBuilder().addComponents(amountInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // KANTOR — TICKET
+        if (interaction.customId === "kantor_wymiana") {
+            const parent = interaction.channel.parentId || URZAD_CATEGORY_ID;
+
+            const ticket = await interaction.guild.channels.create({
+                name: `kantor-${interaction.user.username}`,
+                type: 0,
+                parent: parent,
+                permissionOverwrites: [
+                    { id: interaction.guild.id, deny: ["ViewChannel"] },
+                    { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+                ]
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setDescription(
+`# 💱 Kantor — wymiana waluty
+
+Mój nick w Roblox: **kaloszek77**
+
+Aby wymienić walutę:
+1. Przelej mi w grze **8000€**.
+2. Wyślij pełnoekranowy zrzut ekranu.
+3. Otrzymasz **4000$** na serwerze.`);
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed] });
+
+            return interaction.reply({
+                content: "Ticket kantoru został utworzony!",
+                ephemeral: true
+            });
+        }
+
+        // SKLEP — OTWARCIE MENU
+        if (interaction.customId === "sklep_open") {
+            const menu = new StringSelectMenuBuilder()
+                .setCustomId("sklep_select")
+                .setPlaceholder("Wybierz, co chcesz kupić")
+                .addOptions(
+                    { label: "Ranga Premium (8000$)", value: "premium_8000" },
+                    { label: "Prawo jazdy B (3500$)", value: "pj_B_3500" },
+                    { label: "Prawo jazdy A (3000$)", value: "pj_A_3000" },
+                    { label: "Prawo jazdy T (2000$)", value: "pj_T_2000" },
+                    { label: "Prawo jazdy C (4000$)", value: "pj_C_4000" },
+                    { label: "Prawo jazdy D (4500$)", value: "pj_D_4500" },
+                    { label: "Prawo jazdy C+E (5000$)", value: "pj_CE_5000" }
+                );
+
+            return interaction.reply({
+                content: "Wybierz przedmiot do zakupu:",
+                components: [new ActionRowBuilder().addComponents(menu)],
+                ephemeral: true
+            });
+        }
     }
 
     // ---------- MODALE ----------
@@ -429,6 +718,142 @@ Nick Roblox: ${nick}`
 
             return interaction.reply({
                 content: "Twój wniosek o dowód został wysłany!",
+                ephemeral: true
+            });
+        }
+
+        // BANK — TWORZENIE KONTA
+        if (interaction.customId === "bank_create_modal") {
+            const pin = interaction.fields.getTextInputValue("bank_pin").trim();
+
+            if (!/^\d{4}$/.test(pin)) {
+                return interaction.reply({
+                    content: "❌ PIN musi składać się z dokładnie 4 cyfr.",
+                    ephemeral: true
+                });
+            }
+
+            const existing = getUserAccount(interaction.user.id);
+            if (existing) {
+                return interaction.reply({
+                    content: "❌ Masz już konto bankowe.",
+                    ephemeral: true
+                });
+            }
+
+            setUserAccount(interaction.user.id, pin, 0);
+            loggedInUsers.add(interaction.user.id);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_menu")
+                    .setLabel("Otwórz menu banku")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "✅ Konto bankowe zostało utworzone. Jesteś zalogowany.",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // BANK — LOGOWANIE
+        if (interaction.customId === "bank_login_modal") {
+            const pin = interaction.fields.getTextInputValue("bank_pin_login").trim();
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            if (account.pin !== pin) {
+                return interaction.reply({
+                    content: "❌ Nieprawidłowy PIN.",
+                    ephemeral: true
+                });
+            }
+
+            loggedInUsers.add(interaction.user.id);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_menu")
+                    .setLabel("Otwórz menu banku")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "✅ Zalogowano do banku.",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // BANK — PRZELEW
+        if (interaction.customId === "bank_transfer_modal") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const targetRaw = interaction.fields.getTextInputValue("bank_transfer_target").trim();
+            const amountRaw = interaction.fields.getTextInputValue("bank_transfer_amount").trim();
+
+            const amount = Number(amountRaw);
+            if (isNaN(amount) || amount <= 0) {
+                return interaction.reply({
+                    content: "❌ Kwota musi być dodatnią liczbą.",
+                    ephemeral: true
+                });
+            }
+
+            let targetId = targetRaw;
+            const mentionMatch = targetRaw.match(/^<@!?(\d+)>$/);
+            if (mentionMatch) targetId = mentionMatch[1];
+
+            if (targetId === interaction.user.id) {
+                return interaction.reply({
+                    content: "❌ Nie możesz przelać pieniędzy samemu sobie.",
+                    ephemeral: true
+                });
+            }
+
+            const senderAcc = getUserAccount(interaction.user.id);
+            if (!senderAcc) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            if (senderAcc.balance < amount) {
+                return interaction.reply({
+                    content: "❌ Nie masz wystarczających środków.",
+                    ephemeral: true
+                });
+            }
+
+            const targetAcc = getUserAccount(targetId);
+            if (!targetAcc) {
+                return interaction.reply({
+                    content: "❌ Odbiorca nie ma konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[interaction.user.id].balance -= amount;
+            data[targetId].balance += amount;
+            saveBankData(data);
+
+            return interaction.reply({
+                content: `✅ Przelano **${amount} $** do <@${targetId}>.`,
                 ephemeral: true
             });
         }
@@ -546,7 +971,7 @@ Nick Roblox: ${nick}`
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# 🚗 Wniosek o prawo jazdy
+`# <:koperta:1479760548500471830> Wniosek o prawo jazdy
 
 Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
 Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
@@ -574,6 +999,90 @@ Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobi�
 
             return interaction.reply({
                 content: "Ticket został utworzony!",
+                ephemeral: true
+            });
+        }
+
+        // SKLEP — ZAKUP
+        if (interaction.customId === "sklep_select") {
+            const choice = interaction.values[0];
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            const prices = {
+                "premium_8000": 8000,
+                "pj_B_3500": 3500,
+                "pj_A_3000": 3000,
+                "pj_T_2000": 2000,
+                "pj_C_4000": 4000,
+                "pj_D_4500": 4500,
+                "pj_CE_5000": 5000
+            };
+
+            const names = {
+                "premium_8000": "Ranga Premium",
+                "pj_B_3500": "Prawo jazdy B",
+                "pj_A_3000": "Prawo jazdy A",
+                "pj_T_2000": "Prawo jazdy T",
+                "pj_C_4000": "Prawo jazdy C",
+                "pj_D_4500": "Prawo jazdy D",
+                "pj_CE_5000": "Prawo jazdy C+E"
+            };
+
+            const price = prices[choice];
+            const name = names[choice];
+
+            if (account.balance < price) {
+                return interaction.reply({
+                    content: `❌ Nie masz wystarczających środków. Potrzebujesz **${price} $**.`,
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[interaction.user.id].balance -= price;
+            saveBankData(data);
+
+            return interaction.reply({
+                content: `✅ Zakupiono: **${name}** za **${price} $**.`,
+                ephemeral: true
+            });
+        }
+    }
+
+    // ---------- SLASH KOMENDY ----------
+    if (interaction.isChatInputCommand && interaction.isChatInputCommand()) {
+        if (interaction.commandName === "pracuj") {
+            if (interaction.channelId !== PRACUJ_CHANNEL_ID) {
+                return interaction.reply({
+                    content: "❌ Komendy **/pracuj** możesz używać tylko na kanale <#" + PRACUJ_CHANNEL_ID + ">.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(interaction.user.id);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego. Najpierw zaloguj się w kanale bank.",
+                    ephemeral: true
+                });
+            }
+
+            const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
+
+            const data = loadBankData();
+            data[interaction.user.id].balance += amount;
+            saveBankData(data);
+
+            return interaction.reply({
+                content: `🛠️ Pracowałeś i zarobiłeś **${amount} $**.  
+💰 Twoje nowe saldo: **${data[interaction.user.id].balance} $**`,
                 ephemeral: true
             });
         }
