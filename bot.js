@@ -80,7 +80,7 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
         const embedUrzad = new EmbedBuilder()
             .setColor("Orange")
             .setDescription( 
-             `# :mod: Urząd Miejski   
+             `# <:mod:1479847501149372467> Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
