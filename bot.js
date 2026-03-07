@@ -28,9 +28,9 @@ client.once("ready", async () => {
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-        channel.send("🔥");
-        .setTitle("✔️ Weryfikacja Roblox")
-        .setDescription("Kliknij przycisk poniżej aby podać swój **nick Roblox (nie display name)**.")
+       
+        .setDescription("# 😭 xd
+                        Kliknij przycisk poniżej aby podać swój **nick Roblox (nie display name)**.")
         .setColor("Orange");
 
     const row = new ActionRowBuilder().addComponents(
