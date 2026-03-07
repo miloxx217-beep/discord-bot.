@@ -228,7 +228,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             return interaction.reply({
-                content: "# <:pad:1479760675533492224> Regulamin Roblox 
+                content: `# <:pad:1479760675533492224> Regulamin Roblox 
                     Zakazuje się:
              1. FRP – odgrywanie nielogiczne
 2. RDM – zabijanie bez powodu
@@ -237,14 +237,14 @@ Nick Roblox: ${nick}`
 5. Meta Gaming
 6. Cheaty / Exploity
 7. Podszywanie się pod administrację
-8. Reklama / linki phishingowe",
+8. Reklama / linki phishingowe`,
                 ephemeral: true
             });
         }
 
         if (value === "taryfikator_discord") {
             return interaction.reply({
-                content: "# <:mlot:1479760749541855362> Taryfikator Discord
+                content: `# <:mlot:1479760749541855362> Taryfikator Discord
                      1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
 1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
@@ -262,14 +262,14 @@ Nick Roblox: ${nick}`
 4. Treści i materiały / Reklama / Administracja
 4.1 Udostępnianie nielegalnych linków → PERMANENTNY BAN
 4.2 Nieautoryzowana reklama → PERMANENTNY BAN
-4.3 Lekceważenie poleceń administracji → Ostrzeżenie / czasowy ban",
+4.3 Lekceważenie poleceń administracji → Ostrzeżenie / czasowy ban`,
                 ephemeral: true
             });
         }
 
         if (value === "taryfikator_roblox") {
             return interaction.reply({
-                content: "# <:mlot:1479760749541855362> Taryfikator Roblox
+                content: `# <:mlot:1479760749541855362> Taryfikator Roblox
                     1. FRP – 1 dzień bana
 2. RDM – 1–3 dni bana
 3. VDM – 1–3 dni bana
@@ -277,7 +277,7 @@ Nick Roblox: ${nick}`
 5. Meta Gaming – 3 dni bana
 6. Cheaty / Exploity – PERMANENTNY BAN
 7. Podszywanie się pod administrację – 7 dni bana
-8. Reklama / linki phishingowe – PERMANENTNY BAN",
+8. Reklama / linki phishingowe – PERMANENTNY BAN`,
                 ephemeral: true
             });
         }
