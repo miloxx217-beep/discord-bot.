@@ -254,6 +254,219 @@ Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
 
     channel.send({ embeds: [embed] });
 });
+// ID KATEGORII TICKETÓW
+const categoryId = "1479814526588420137";
+
+
+// ==========================
+//     KOMENDA /urzad
+// ==========================
+
+if (command === "urzad") {
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setDescription(
+`# 🏛️ Witaj w Urzędzie Miejskim
+
+Znajdujesz się w oficjalnym panelu urzędu.  
+Możesz tutaj wyrobić **dowód osobisty**, uzyskać **prawo jazdy**, lub zadać **pytanie urzędowi**.
+
+Po kliknięciu odpowiedniego przycisku zostanie utworzony ticket, w którym pracownik urzędu zajmie się Twoją sprawą.  
+Pamiętaj, aby podawać prawdziwe i dokładne dane — przyspieszy to cały proces.`);
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("dowod_start")
+            .setLabel("Dowód osobisty")
+            .setStyle(ButtonStyle.Primary),
+
+        new ButtonBuilder()
+            .setCustomId("pj_start")
+            .setLabel("Prawo jazdy")
+            .setStyle(ButtonStyle.Success),
+
+        new ButtonBuilder()
+            .setCustomId("urzad_pytanie")
+            .setLabel("Zapytanie do urzędu")
+            .setStyle(ButtonStyle.Secondary)
+    );
+
+    channel.send({ embeds: [embed], components: [row] });
+}
+
+
+
+// ==========================
+//     OBSŁUGA PRZYCISKÓW
+// ==========================
+
+// 🪪 DOWÓD OSOBISTY
+if (interaction.customId === "dowod_start") {
+
+    const ticket = await interaction.guild.channels.create({
+        name: `dowod-${interaction.user.username}`,
+        type: 0,
+        parent: categoryId
+    });
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setDescription(
+`# 🪪 Wniosek o wydanie dowodu
+
+Wypełnij poniższy formularz w jednej wiadomości.
+
+| **Pole**         | **Wartość do podania**                     |
+|------------------|---------------------------------------------|
+| Imię             | Twoje prawdziwe imię                        |
+| Nazwisko         | Twoje prawdziwe nazwisko                    |
+| Płeć             | Wpisz **M** lub **K**                       |
+| Obywatelstwo     | Np. Polskie, Niemieckie, Ukraińskie         |
+
+**Przykład:**
+
+\`Imię: Jan\`  
+\`Nazwisko: Kowalski\`  
+\`Płeć: M\`  
+\`Obywatelstwo: Polskie\`
+
+Wpisz swoje dane poniżej.`);
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("ticket_close")
+            .setLabel("Zamknij ticket")
+            .setStyle(ButtonStyle.Danger),
+
+        new ButtonBuilder()
+            .setCustomId("ticket_accept")
+            .setLabel("Przyjmij sprawę")
+            .setStyle(ButtonStyle.Success)
+    );
+
+    ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+    interaction.reply({ content: "Ticket został utworzony.", ephemeral: true });
+}
+
+
+
+// 🚗 PRAWO JAZDY — WYBÓR KATEGORII
+if (interaction.customId === "pj_start") {
+
+    const menu = new StringSelectMenuBuilder()
+        .setCustomId("pj_kategoria")
+        .setPlaceholder("Wybierz kategorię prawa jazdy")
+        .addOptions(
+            { label: "Kategoria B", value: "B" },
+            { label: "Kategoria A", value: "A" },
+            { label: "Kategoria C", value: "C" },
+            { label: "Kategoria D", value: "D" }
+        );
+
+    interaction.reply({
+        content: "Wybierz kategorię prawa jazdy:",
+        components: [new ActionRowBuilder().addComponents(menu)],
+        ephemeral: true
+    });
+}
+
+
+
+// 🚗 PRAWO JAZDY — TWORZENIE TICKETA
+if (interaction.customId === "pj_kategoria") {
+
+    const kat = interaction.values[0];
+
+    const ticket = await interaction.guild.channels.create({
+        name: `prawojazdy-${interaction.user.username}`,
+        type: 0,
+        parent: categoryId
+    });
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setDescription(
+`# 🚗 Wniosek o prawo jazdy
+
+Wybrałeś kategorię **${kat}**.  
+Podaj poniżej swoje dane, aby kontynuować proces.`);
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("ticket_close")
+            .setLabel("Zamknij ticket")
+            .setStyle(ButtonStyle.Danger),
+
+        new ButtonBuilder()
+            .setCustomId("ticket_accept")
+            .setLabel("Przyjmij sprawę")
+            .setStyle(ButtonStyle.Success)
+    );
+
+    ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+    interaction.reply({ content: "Ticket został utworzony.", ephemeral: true });
+}
+
+
+
+// ❓ PYTANIE DO URZĘDU
+if (interaction.customId === "urzad_pytanie") {
+
+    const ticket = await interaction.guild.channels.create({
+        name: `pytanie-${interaction.user.username}`,
+        type: 0,
+        parent: categoryId
+    });
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setDescription(
+`# ❓ Zapytanie do urzędu
+
+Opisz dokładnie swoje pytanie lub problem.  
+Pracownik urzędu odpowie tak szybko, jak to możliwe.`);
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("ticket_close")
+            .setLabel("Zamknij ticket")
+            .setStyle(ButtonStyle.Danger),
+
+        new ButtonBuilder()
+            .setCustomId("ticket_accept")
+            .setLabel("Przyjmij sprawę")
+            .setStyle(ButtonStyle.Success)
+    );
+
+    ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+    interaction.reply({ content: "Ticket został utworzony.", ephemeral: true });
+}
+
+
+
+// ==========================
+//     ZAMYKANIE TICKETA
+// ==========================
+
+if (interaction.customId === "ticket_close") {
+    interaction.channel.delete();
+}
+
+
+
+// ==========================
+//     PRZYJMOWANIE SPRAWY
+// ==========================
+
+if (interaction.customId === "ticket_accept") {
+
+    if (interaction.user.id !== interaction.guild.ownerId)
+        return interaction.reply({ content: "Tylko właściciel serwera może przyjąć sprawę.", ephemeral: true });
+
+    interaction.reply({ content: "Sprawa została przyjęta przez właściciela.", ephemeral: false });
+}
+
 
 
 
