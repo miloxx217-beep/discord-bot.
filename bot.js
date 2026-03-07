@@ -28,7 +28,9 @@ client.once("ready", async () => {
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-        .setDescription("# <:konfetti:1479760987790770288> Weryfikacja Roblox\n\n\nKliknij przycisk poniżej aby podać swój **nick Roblox**.")
+        .setDescription("# <:konfetti:1479760987790770288> Weryfikacja Roblox\n\nKliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.  
+Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.
+Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.")
         .setColor("Orange");
 
     const row = new ActionRowBuilder().addComponents(
@@ -47,8 +49,7 @@ client.on("messageCreate", async (message) => {
 
     if (message.content === "!regulamin") {
         const embed = new EmbedBuilder()
-            .setTitle("<:koperta:1479760548500471830> Regulamin serwera")
-            .setDescription(`Witamy na naszym serwerze!
+            .setDescription(`# <:koperta:1479760548500471830> Regulamin serwera\n\nWitamy na naszym serwerze!
 
 Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
 
@@ -169,7 +170,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_discord") {
             interaction.reply({
-                content: `<:mlot:1479760749541855362> Taryfikator Discord 
+                content: `# <:mlot:1479760749541855362> Taryfikator Discord 
                 
                 1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
@@ -195,7 +196,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             interaction.reply({
-                content: `<:pad:1479760675533492224> Regulamin Roblox
+                content: `# <:pad:1479760675533492224> Regulamin Roblox
                 
                 1. FRP – odgrywanie nielogiczne
 2. RDM – zabijanie bez powodu
@@ -211,7 +212,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_roblox") {
             interaction.reply({
-                content: `<:mlot:1479760749541855362> Taryfikator Roblox 
+                content: `# <:mlot:1479760749541855362> Taryfikator Roblox 
                 
                 1. FRP – 1 dzień bana
 2. RDM – 1–3 dni bana
