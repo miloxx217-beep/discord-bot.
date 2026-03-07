@@ -27,11 +27,18 @@ client.once("ready", async () => {
     const guild = client.guilds.cache.get(GUILD_ID);
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
-    const embed = new EmbedBuilder()
-        .setDescription("# <:konfetti:1479760987790770288> Weryfikacja Roblox\n\nKliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.  
-Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.
-Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.")
-        .setColor("Orange");
+  const embed = new EmbedBuilder()
+    .setDescription(
+`# <:konfetti:1479760987790770288> Weryfikacja Roblox 
+
+Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.  
+Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.  
+Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.`
+    )
+    .setColor("Orange");
+
+channel.send({ embeds: [embed] });
+
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
