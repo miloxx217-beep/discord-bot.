@@ -32,7 +32,7 @@ client.once("ready", async () => {
         .setDescription(
 `# <:konfetti:1479760987790770288> Weryfikacja Roblox 
 
-Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox.`)
+Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.`)
         .setColor("Orange");
 
     const row = new ActionRowBuilder().addComponents(
@@ -42,7 +42,9 @@ Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy ni
             .setStyle(ButtonStyle.Secondary)
     );
 
-    channel.send({ embeds: [embed], components: [row] });
+    if (channel) {
+        channel.send({ embeds: [embed], components: [row] });
+    }
 
     // REJESTRACJA KOMENDY /urzad
     await client.application.commands.create({
@@ -79,13 +81,21 @@ Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.`)
     }
 });
 
-// 🔥🔥🔥 CAŁY interactionCreate — WSZYSTKO W JEDNYM 🔥🔥🔥
+// INTERAKCJE
 client.on("interactionCreate", async (interaction) => {
 
     // ============================
     // 🔹 KOMENDA /urzad
     // ============================
     if (interaction.isChatInputCommand() && interaction.commandName === "urzad") {
+
+        // tylko właściciel serwera
+        if (interaction.user.id !== interaction.guild.ownerId) {
+            return interaction.reply({
+                content: "❌ Tylko właściciel serwera może użyć tej komendy.",
+                ephemeral: true
+            });
+        }
 
         const embed = new EmbedBuilder()
             .setColor("Orange")
@@ -115,7 +125,11 @@ Wybierz jedną z dostępnych opcji:
                 .setStyle(ButtonStyle.Secondary)
         );
 
-        return interaction.reply({ embeds: [embed], components: [row] });
+        return interaction.reply({
+            embeds: [embed],
+            components: [row],
+            ephemeral: true
+        });
     }
 
     // ============================
@@ -179,6 +193,10 @@ Podaj swoje dane w jednej wiadomości:
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
+                    .setCustomId("ticket_accept")
+                    .setLabel("Przyjmij zgłoszenie")
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
                     .setCustomId("ticket_close")
                     .setLabel("Zamknij ticket")
                     .setStyle(ButtonStyle.Danger)
@@ -197,13 +215,23 @@ Podaj swoje dane w jednej wiadomości:
                     { label: "Kategoria B", value: "B" },
                     { label: "Kategoria A", value: "A" },
                     { label: "Kategoria C", value: "C" },
-                    { label: "Kategoria D", value: "D" }
+                    { label: "Kategoria C+E", value: "CE" },
+                    { label: "Kategoria D", value: "D" },
+                    { label: "Kategoria T", value: "T" }
                 );
 
             return interaction.reply({
                 content: "Wybierz kategorię prawa jazdy:",
                 components: [new ActionRowBuilder().addComponents(menu)],
                 ephemeral: true
+            });
+        }
+
+        // PRZYCISK — PRZYJĘCIE ZGŁOSZENIA
+        if (interaction.customId === "ticket_accept") {
+            return interaction.reply({
+                content: `✔️ Zgłoszenie zostało przyjęte przez ${interaction.user}.`,
+                ephemeral: false
             });
         }
 
@@ -221,11 +249,13 @@ Podaj swoje dane w jednej wiadomości:
             const nick = interaction.fields.getTextInputValue("roblox_nick");
             const adminChannel = interaction.guild.channels.cache.get(ADMIN_CHANNEL_ID);
 
-            adminChannel.send(
-                `<:osoba:1479761131206611078> **Nowa weryfikacja**
+            if (adminChannel) {
+                adminChannel.send(
+`<:osoba:1479761131206611078> **Nowa weryfikacja**
 Użytkownik: ${interaction.user.tag}
 Nick Roblox: ${nick}`
-            );
+                );
+            }
 
             return interaction.reply({
                 content: "Twój nick został wysłany do weryfikacji <:ptaszek:1479761065850962020>",
@@ -244,23 +274,23 @@ Nick Roblox: ${nick}`
             return interaction.reply({
                 content: `# <:koperta:1479760548500471830> Regulamin Discord
 
- 1. Zachowanie ogólne
-1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
-1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
+1. Zachowanie ogólne  
+1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.  
+1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.  
 1.3 Spamowanie lub floodowanie → niedozwolone.
 
-2. Roleplay / Postacie
-2.1 Odgrywaj swoją postać spójnie i logicznie.
+2. Roleplay / Postacie  
+2.1 Odgrywaj swoją postać spójnie i logicznie.  
 2.2 Tworzenie postaci powinno być zgodne z zasadami serwera.
 
-3. Kanały i komunikacja
-3.1 Korzystaj z kanałów zgodnie z ich przeznaczeniem.
-3.2 Zachowuj kulturę na kanałach głosowych.
+3. Kanały i komunikacja  
+3.1 Korzystaj z kanałów zgodnie z ich przeznaczeniem.  
+3.2 Zachowuj kulturę na kanałach głosowych.  
 3.3 Nie publikuj treści NSFW ani materiałów nielegalnych.
 
-4. Treści, reklama i administracja
-4.1 Materiały i linki muszą być legalne.
-4.2 Reklama bez zgody administracji jest zabroniona.
+4. Treści, reklama i administracja  
+4.1 Materiały i linki muszą być legalne.  
+4.2 Reklama bez zgody administracji jest zabroniona.  
 4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
                 ephemeral: true
             });
@@ -268,7 +298,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             return interaction.reply({
-                content: `# <:pad:1479760675533492224> Regulamin Roblox
+                content: `# <:pad:1479760675533492224> Regulamin Roblox 
 
 1. FRP – odgrywanie nielogiczne  
 2. RDM – zabijanie bez powodu  
@@ -286,23 +316,23 @@ Nick Roblox: ${nick}`
             return interaction.reply({
                 content: `# <:mlot:1479760749541855362> Taryfikator Discord
 
- 1. Zachowanie ogólne
-1.1 Obraźliwe zachowanie → Ostrzeżenie
-1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
+1. Zachowanie ogólne  
+1.1 Obraźliwe zachowanie → Ostrzeżenie  
+1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie  
 1.3 Spam / flood → Ostrzeżenie
 
-2. Roleplay / Postacie
-2.1 Nieprzestrzeganie zasad RP → Ostrzeżenie
+2. Roleplay / Postacie  
+2.1 Nieprzestrzeganie zasad RP → Ostrzeżenie  
 2.2 Tworzenie postaci niezgodnie z zasadami → Ostrzeżenie
 
-3. Kanały i komunikacja
-3.1 Nieodpowiednie użycie kanałów → Tymczasowe wyciszenie
-3.2 Zakłócanie rozmów głosowych → Ostrzeżenie
+3. Kanały i komunikacja  
+3.1 Nieodpowiednie użycie kanałów → Tymczasowe wyciszenie  
+3.2 Zakłócanie rozmów głosowych → Ostrzeżenie  
 3.3 Publikowanie treści NSFW / nielegalnych → PERMANENTNY BAN
 
-4. Treści i materiały / Reklama / Administracja
-4.1 Udostępnianie nielegalnych linków → PERMANENTNY BAN
-4.2 Nieautoryzowana reklama → PERMANENTNY BAN
+4. Treści i materiały / Reklama / Administracja  
+4.1 Udostępnianie nielegalnych linków → PERMANENTNY BAN  
+4.2 Nieautoryzowana reklama → PERMANENTNY BAN  
 4.3 Lekceważenie poleceń administracji → Ostrzeżenie / czasowy ban`,
                 ephemeral: true
             });
@@ -347,6 +377,10 @@ Podaj swoje dane, aby kontynuować.`);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
+                .setCustomId("ticket_accept")
+                .setLabel("Przyjmij zgłoszenie")
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
                 .setCustomId("ticket_close")
                 .setLabel("Zamknij ticket")
                 .setStyle(ButtonStyle.Danger)
@@ -374,6 +408,10 @@ Opisz swój problem lub pytanie.`);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
+                .setCustomId("ticket_accept")
+                .setLabel("Przyjmij zgłoszenie")
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
                 .setCustomId("ticket_close")
                 .setLabel("Zamknij ticket")
                 .setStyle(ButtonStyle.Danger)
@@ -385,9 +423,7 @@ Opisz swój problem lub pytanie.`);
 
 });
 
-// ============================
-// 🔹 POWITANIE
-// ============================
+// POWITANIE
 client.on("guildMemberAdd", async (member) => {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
     if (!channel) return;
