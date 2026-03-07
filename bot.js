@@ -1,14 +1,14 @@
-const { 
+const {
     Client, GatewayIntentBits, EmbedBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
     ModalBuilder, TextInputBuilder, TextInputStyle,
     InteractionType, StringSelectMenuBuilder,
-    Partials
+    Partials, REST, Routes, SlashCommandBuilder
 } = require("discord.js");
 const fs = require("fs");
 
 // ============================
-// 🔹 KONFIGURACJA BOTA
+// 🔹 KONFIGURACJA BOTA / SERWERA
 // ============================
 const client = new Client({
     intents: [
@@ -20,10 +20,9 @@ const client = new Client({
     partials: [Partials.Channel]
 });
 
-// ============================
-// 🔹 KONFIGURACJA SERWERA
-// ============================
 const GUILD_ID = "1478750576408793239";
+const CLIENT_ID = "1478769644771872818";
+
 const VERIFY_CHANNEL_ID = "1478782389248327720";
 const ADMIN_CHANNEL_ID = "1478787933350658138";
 const WELCOME_CHANNEL_ID = "1479172496627339417";
@@ -69,7 +68,6 @@ function saveUserID(userId) {
 // 🔹 EKONOMIA — BANK (TXT)
 // ============================
 const BANK_FILE = "bank.txt"; // format: userId|pin|balance
-
 const loggedInUsers = new Set();
 
 function loadBankData() {
@@ -104,10 +102,44 @@ function setUserAccount(userId, pin, balance) {
 }
 
 // ============================
+// 🔹 AUTOMATYCZNA REJESTRACJA KOMEND
+// ============================
+const slashCommands = [
+    new SlashCommandBuilder()
+        .setName("pracuj")
+        .setDescription("Pracuj i zarób od 30 do 400 monet."),
+    new SlashCommandBuilder()
+        .setName("dodajkase")
+        .setDescription("Dodaj pieniądze użytkownikowi (tylko właściciel).")
+        .addUserOption(option =>
+            option.setName("uzytkownik")
+                .setDescription("Użytkownik, któremu chcesz dodać kasę")
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName("kwota")
+                .setDescription("Kwota do dodania")
+                .setRequired(true))
+].map(cmd => cmd.toJSON());
+
+const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+
+// ============================
 // 🔹 READY
 // ============================
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
+
+    // Rejestracja komend
+    try {
+        console.log("Rejestrowanie komend slash...");
+        await rest.put(
+            Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+            { body: slashCommands }
+        );
+        console.log("Komendy slash zarejestrowane!");
+    } catch (err) {
+        console.error("Błąd przy rejestracji komend:", err);
+    }
 
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) return;
@@ -143,17 +175,18 @@ Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej 
 `# <:mod:1479847501149372467> Urząd Miejski   
 Witaj w oficjalnym panelu Urzędu Miejskiego.
 
-Poniżej znajdziesz trzy główne sekcje:
+Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
 
-• **Dowód osobisty**  
-  Złóż wniosek o wydanie dowodu osobistego.
+• Dowód osobisty
+Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
 
-• **Prawo jazdy**  
-  Złóż wniosek o prawo jazdy w wybranej kategorii.  
-  **Wymagane jest wcześniejsze zakupienie prawa jazdy w sklepie serwera.**
+• Prawo jazdy
+Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
+Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
+Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
 
-• **Zapytanie do urzędu**  
-  Masz pytanie lub sprawę do administracji? Otwórz ticket.`);
+• Zapytanie do urzędu
+Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -181,13 +214,28 @@ Poniżej znajdziesz trzy główne sekcje:
             .setDescription(
 `# <:mlot:1479760749541855362> Bank
 
-Witaj w banku.  
-Tutaj możesz:
-• sprawdzić swoje saldo,  
-• przelać pieniądze innemu graczowi.
+Witamy w oficjalnym systemie bankowym serwera.  
+Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
 
-Aby skorzystać z usług banku, zaloguj się przyciskiem poniżej.  
-Jeśli nie masz jeszcze konta, utworzysz 4-cyfrowy PIN.`);
+## - Dostępne usługi:
+• **Sprawdzenie salda** – natychmiastowy podgląd aktualnego stanu Twojego konta.  
+• **Przelewy między graczami** – szybkie i bezpieczne przesyłanie środków innym mieszkańcom.  
+
+## - Logowanie i bezpieczeństwo
+Aby uzyskać dostęp do swojego konta, kliknij przycisk **Zaloguj się** poniżej.  
+Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie **4‑cyfrowego PIN-u**, który będzie służył jako zabezpieczenie Twojego konta.
+
+PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.  
+Bank Centralny nigdy nie poprosi Cię o podanie PIN-u poza oficjalnym panelem logowania.
+
+## - Informacje dodatkowe
+• Każdy gracz może posiadać tylko jedno konto bankowe.  
+• Przelewy są realizowane natychmiastowo.  
+• W przypadku problemów technicznych skontaktuj się z Urzędem Miejskim.
+
+Dziękujemy za korzystanie z usług Banku Centralnego.  
+Twoje bezpieczeństwo i wygoda są naszym priorytetem.
+`);
 
         const rowBank = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -205,14 +253,32 @@ Jeśli nie masz jeszcze konta, utworzysz 4-cyfrowy PIN.`);
         const embedKantor = new EmbedBuilder()
             .setColor("Orange")
             .setDescription(
-`# 💱 Kantor
+`# <:konfetti:1479760987790770288> Kantor
 
-Jeśli chcesz wymienić walutę:
+Witamy w oficjalnym Kantorze Miejskim, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
 
-• 8000€ w grze = 4000$ na serwerze  
+## - Informacje o kursie wymiany
+Aktualny kurs walut został ustalony przez Bank Centralny i obowiązuje wszystkich mieszkańców miasta:
 
-Kliknij przycisk poniżej, aby otworzyć ticket wymiany.  
-W ticketcie znajdziesz mój nick Roblox: **kaloszek77** — musisz przelać mi pieniądze w grze, aby otrzymać walutę na serwerze.`);
+• **8000€ w grze → 4000$ na serwerze**
+
+Kurs może ulegać zmianom w zależności od sytuacji ekonomicznej, dlatego zawsze warto sprawdzać aktualne informacje w tym panelu.
+
+## - Jak działa wymiana?
+Proces wymiany waluty jest prosty i w pełni bezpieczny:
+
+1. Kliknij przycisk **Wymień walutę**, aby otworzyć indywidualny ticket obsługi.
+2. W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
+3. Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
+
+## - Zasady bezpieczeństwa
+• Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.  
+• Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.  
+• Administracja czuwa nad prawidłowym przebiegiem każdej wymiany.
+
+Dziękujemy za korzystanie z usług Kantoru .  
+Twoje bezpieczeństwo i wygoda są dla nas priorytetem.
+`);
 
         const rowKantor = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -230,9 +296,31 @@ W ticketcie znajdziesz mój nick Roblox: **kaloszek77** — musisz przelać mi p
         const embedSklep = new EmbedBuilder()
             .setColor("Orange")
             .setDescription(
-`# 🛒 Sklep
+`# <:sklep:1479916476210352239> Sklep
 
-Jeśli chcesz coś kupić, kliknij przycisk poniżej i wybierz interesujący Cię produkt.`);
+Witamy w oficjalnym sklepie serwera.  
+To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy.
+
+## - Jak działa sklep?
+Po kliknięciu przycisku **Otwórz sklep** wyświetli Ci się lista dostępnych produktów.  
+Każdy zakup jest realizowany automatycznie — środki zostaną pobrane z Twojego konta bankowego, a zakup zostanie natychmiast zapisany w systemie.
+
+## - Co możesz tutaj kupić?
+W sklepie znajdziesz m.in.:
+• specjalne rangi i uprawnienia,  
+• licencje oraz kategorie prawa jazdy,  
+• przedmioty i usługi przydatne w rozgrywce.
+
+Oferta sklepu może być aktualizowana w zależności od potrzeb mieszkańców oraz decyzji administracji.
+
+## - Zasady zakupów
+• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.  
+• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.  
+• W przypadku problemów z zakupem możesz otworzyć ticket w Urzędzie Miejskim.
+
+Dziękujemy za korzystanie ze Sklepu .  
+Życzymy udanych zakupów i przyjemnej rozgrywki.
+`);
 
         const rowSklep = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -372,8 +460,8 @@ client.on("interactionCreate", async (interaction) => {
                 .setDescription(
 `Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
 
-🔸 **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**  
-🔸 Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
+- **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**  
+- Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
 
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("pj_kategoria")
@@ -410,7 +498,7 @@ client.on("interactionCreate", async (interaction) => {
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# ❓ Zapytanie do urzędu
+`# <:mlot:1479760749541855362> Zapytanie do urzędu
 
 Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
 
@@ -622,7 +710,7 @@ Mój nick w Roblox: **kaloszek77**
 
 Aby wymienić walutę:
 1. Przelej mi w grze **8000€**.
-2. Wyślij pełnoekranowy zrzut ekranu.
+2. Wyślij pełnoekranowy zrzut ekranu razem z godziną i datą.
 3. Otrzymasz **4000$** na serwerze.`);
 
             await ticket.send({ content: `${interaction.user}`, embeds: [embed] });
@@ -1057,8 +1145,11 @@ Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobi�
     }
 
     // ---------- SLASH KOMENDY ----------
-    if (interaction.isChatInputCommand && interaction.isChatInputCommand()) {
+    if (interaction.isChatInputCommand()) {
+
+        // /pracuj
         if (interaction.commandName === "pracuj") {
+
             if (interaction.channelId !== PRACUJ_CHANNEL_ID) {
                 return interaction.reply({
                     content: "❌ Komendy **/pracuj** możesz używać tylko na kanale <#" + PRACUJ_CHANNEL_ID + ">.",
@@ -1083,6 +1174,45 @@ Jeśli chcesz przekazać dodatkowe informacje lub zadać pytanie, możesz zrobi�
             return interaction.reply({
                 content: `🛠️ Pracowałeś i zarobiłeś **${amount} $**.  
 💰 Twoje nowe saldo: **${data[interaction.user.id].balance} $**`,
+                ephemeral: true
+            });
+        }
+
+        // /dodajkase
+        if (interaction.commandName === "dodajkase") {
+
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return interaction.reply({
+                    content: "❌ Tylko właściciel serwera może używać tej komendy.",
+                    ephemeral: true
+                });
+            }
+
+            const user = interaction.options.getUser("uzytkownik");
+            const kwota = interaction.options.getInteger("kwota");
+
+            if (!user || !kwota || kwota <= 0) {
+                return interaction.reply({
+                    content: "❌ Podaj poprawnego użytkownika i dodatnią kwotę.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(user.id);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Ten użytkownik nie ma konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[user.id].balance += kwota;
+            saveBankData(data);
+
+            return interaction.reply({
+                content: `✅ Dodano **${kwota} $** do konta ${user}.  
+Nowe saldo: **${data[user.id].balance} $**`,
                 ephemeral: true
             });
         }
