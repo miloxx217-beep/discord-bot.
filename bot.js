@@ -32,10 +32,7 @@ client.once("ready", async () => {
         .setDescription(
 `# <:konfetti:1479760987790770288> Weryfikacja Roblox 
 
-Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.  
-Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.  
-Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.`
-        )
+Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox.`)
         .setColor("Orange");
 
     const row = new ActionRowBuilder().addComponents(
@@ -82,10 +79,48 @@ Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.`)
     }
 });
 
-// INTERAKCJE
+// 🔥🔥🔥 CAŁY interactionCreate — WSZYSTKO W JEDNYM 🔥🔥🔥
 client.on("interactionCreate", async (interaction) => {
 
-    // PRZYCISKI
+    // ============================
+    // 🔹 KOMENDA /urzad
+    // ============================
+    if (interaction.isChatInputCommand() && interaction.commandName === "urzad") {
+
+        const embed = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# 🏛️ Urząd Miejski
+
+Wybierz jedną z dostępnych opcji:
+
+• Dowód osobisty  
+• Prawo jazdy  
+• Zapytanie do urzędu`);
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("dowod_start")
+                .setLabel("Dowód osobisty")
+                .setStyle(ButtonStyle.Primary),
+
+            new ButtonBuilder()
+                .setCustomId("pj_start")
+                .setLabel("Prawo jazdy")
+                .setStyle(ButtonStyle.Success),
+
+            new ButtonBuilder()
+                .setCustomId("urzad_pytanie")
+                .setLabel("Zapytanie do urzędu")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        return interaction.reply({ embeds: [embed], components: [row] });
+    }
+
+    // ============================
+    // 🔹 PRZYCISKI
+    // ============================
     if (interaction.isButton()) {
 
         // WERYFIKACJA
@@ -104,7 +139,7 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // REGULAMINY
+        // REGULAMINY — OTWARCIE MENU
         if (interaction.customId === "regulamin_przycisk") {
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("wybor_regulaminu")
@@ -178,7 +213,9 @@ Podaj swoje dane w jednej wiadomości:
         }
     }
 
-    // MODAL WERYFIKACJI
+    // ============================
+    // 🔹 MODALE
+    // ============================
     if (interaction.type === InteractionType.ModalSubmit) {
         if (interaction.customId === "verification_modal") {
             const nick = interaction.fields.getTextInputValue("roblox_nick");
@@ -197,14 +234,17 @@ Nick Roblox: ${nick}`
         }
     }
 
-    // MENU REGULAMINU
+    // ============================
+    // 🔹 SELECT MENU — REGULAMINY
+    // ============================
     if (interaction.isStringSelectMenu()) {
         const value = interaction.values[0];
 
         if (value === "discord") {
             return interaction.reply({
                 content: `# <:koperta:1479760548500471830> Regulamin Discord
-                      1. Zachowanie ogólne
+
+ 1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
 1.3 Spamowanie lub floodowanie → niedozwolone.
@@ -228,15 +268,15 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             return interaction.reply({
-                content: `# <:pad:1479760675533492224> Regulamin Roblox 
-                    Zakazuje się:
-             1. FRP – odgrywanie nielogiczne
-2. RDM – zabijanie bez powodu
-3. VDM – zabijanie pojazdami
-4. Power Gaming
-5. Meta Gaming
-6. Cheaty / Exploity
-7. Podszywanie się pod administrację
+                content: `# <:pad:1479760675533492224> Regulamin Roblox
+
+1. FRP – odgrywanie nielogiczne  
+2. RDM – zabijanie bez powodu  
+3. VDM – zabijanie pojazdami  
+4. Power Gaming  
+5. Meta Gaming  
+6. Cheaty / Exploity  
+7. Podszywanie się pod administrację  
 8. Reklama / linki phishingowe`,
                 ephemeral: true
             });
@@ -245,7 +285,8 @@ Nick Roblox: ${nick}`
         if (value === "taryfikator_discord") {
             return interaction.reply({
                 content: `# <:mlot:1479760749541855362> Taryfikator Discord
-                     1. Zachowanie ogólne
+
+ 1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
 1.2 Powtarzające się wykroczenia → Tymczasowe wyciszenie
 1.3 Spam / flood → Ostrzeżenie
@@ -270,20 +311,23 @@ Nick Roblox: ${nick}`
         if (value === "taryfikator_roblox") {
             return interaction.reply({
                 content: `# <:mlot:1479760749541855362> Taryfikator Roblox
-                    1. FRP – 1 dzień bana
-2. RDM – 1–3 dni bana
-3. VDM – 1–3 dni bana
-4. Power Gaming – 3 dni bana
-5. Meta Gaming – 3 dni bana
-6. Cheaty / Exploity – PERMANENTNY BAN
-7. Podszywanie się pod administrację – 7 dni bana
+
+1. FRP – 1 dzień bana  
+2. RDM – 1–3 dni bana  
+3. VDM – 1–3 dni bana  
+4. Power Gaming – 3 dni bana  
+5. Meta Gaming – 3 dni bana  
+6. Cheaty / Exploity – PERMANENTNY BAN  
+7. Podszywanie się pod administrację – 7 dni bana  
 8. Reklama / linki phishingowe – PERMANENTNY BAN`,
                 ephemeral: true
             });
         }
     }
 
-    // URZĄD — PRAWO JAZDY (TICKET)
+    // ============================
+    // 🔹 URZĄD — PRAWO JAZDY (TICKET)
+    // ============================
     if (interaction.customId === "pj_kategoria") {
         const kat = interaction.values[0];
 
@@ -312,7 +356,9 @@ Podaj swoje dane, aby kontynuować.`);
         return interaction.reply({ content: "Ticket został utworzony!", ephemeral: true });
     }
 
-    // URZĄD — PYTANIE
+    // ============================
+    // 🔹 URZĄD — PYTANIE
+    // ============================
     if (interaction.customId === "urzad_pytanie") {
         const ticket = await interaction.guild.channels.create({
             name: `pytanie-${interaction.user.username}`,
@@ -336,9 +382,12 @@ Opisz swój problem lub pytanie.`);
         ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
         return interaction.reply({ content: "Ticket został utworzony!", ephemeral: true });
     }
+
 });
 
-// POWITANIE
+// ============================
+// 🔹 POWITANIE
+// ============================
 client.on("guildMemberAdd", async (member) => {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
     if (!channel) return;
