@@ -492,3 +492,48 @@ Nick Roblox: ${nick}`
 
         const embed = new EmbedBuilder()
             .setColor("Orange")
+            .setDescription(`# 🚗 Wniosek o prawo jazdy
+
+Wybrałeś kategorię **${kat}**.
+
+Podaj swoje dane, aby kontynuować.`);
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("ticket_accept")
+                .setLabel("Przyjmij zgłoszenie")
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId("ticket_close")
+                .setLabel("Zamknij ticket")
+                .setStyle(ButtonStyle.Danger)
+        );
+
+        ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+        return interaction.reply({
+            content: "Ticket został utworzony!",
+            ephemeral: true
+        });
+    }
+});
+
+// ============================
+// 🔹 POWITANIE (BEZ ZMIAN)
+// ============================
+client.on("guildMemberAdd", async (member) => {
+    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    if (!channel) return;
+
+    const embed = new EmbedBuilder()
+        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!<:konfetti:1479760987790770288>
+        Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
+        .setColor("Orange")
+        .setThumbnail(member.user.displayAvatarURL());
+
+    channel.send({ embeds: [embed] });
+});
+
+// LOGIN
+client.login(process.env.TOKEN);
