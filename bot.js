@@ -254,13 +254,63 @@ Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
 
     channel.send({ embeds: [embed] });
 });
+const { 
+    Client, 
+    GatewayIntentBits, 
+    EmbedBuilder, 
+    ActionRowBuilder, 
+    ButtonBuilder, 
+    ButtonStyle,
+    StringSelectMenuBuilder,
+    SlashCommandBuilder,
+    REST,
+    Routes
+} = require("discord.js");
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
+// ==========================
+// REJESTRACJA KOMENDY /urzad
+// ==========================
+
+const commands = [
+    new SlashCommandBuilder()
+        .setName("urzad")
+        .setDescription("Otwiera panel urzędu")
+].map(cmd => cmd.toJSON());
+
+const rest = new REST({ version: "10" }).setToken("TWÓJ_TOKEN");
+
+(async () => {
+    try {
+        await rest.put(
+            Routes.applicationCommands("TWÓJ_CLIENT_ID"),
+            { body: commands }
+        );
+        console.log("Komenda /urzad zarejestrowana");
+    } catch (err) {
+        console.error(err);
+    }
+})();
+
+
+// ==========================
+//      SYSTEM TICKETÓW
+// ==========================
+
 const categoryId = "1479814526588420137";
 
 client.on("interactionCreate", async interaction => {
 
-    // ==========================
-    //        KOMENDA /urzad
-    // ==========================
+    // --------------------------
+    // KOMENDA /urzad
+    // --------------------------
     if (interaction.isChatInputCommand() && interaction.commandName === "urzad") {
 
         const embed = new EmbedBuilder()
@@ -293,10 +343,9 @@ Kliknij odpowiedni przycisk, aby otworzyć ticket.`);
     }
 
 
-
-    // ==========================
-    //     DOWÓD OSOBISTY
-    // ==========================
+    // --------------------------
+    // DOWÓD OSOBISTY
+    // --------------------------
     if (interaction.customId === "dowod_start") {
 
         const ticket = await interaction.guild.channels.create({
@@ -338,10 +387,9 @@ Wpisz dane w jednej wiadomości.`);
     }
 
 
-
-    // ==========================
-    //     PRAWO JAZDY — MENU
-    // ==========================
+    // --------------------------
+    // PRAWO JAZDY – MENU
+    // --------------------------
     if (interaction.customId === "pj_start") {
 
         const menu = new StringSelectMenuBuilder()
@@ -362,10 +410,9 @@ Wpisz dane w jednej wiadomości.`);
     }
 
 
-
-    // ==========================
-    //     PRAWO JAZDY — TICKET
-    // ==========================
+    // --------------------------
+    // PRAWO JAZDY – TICKET
+    // --------------------------
     if (interaction.customId === "pj_kategoria") {
 
         const kat = interaction.values[0];
@@ -401,10 +448,9 @@ Podaj swoje dane, aby kontynuować.`);
     }
 
 
-
-    // ==========================
-    //     PYTANIE DO URZĘDU
-    // ==========================
+    // --------------------------
+    // PYTANIE DO URZĘDU
+    // --------------------------
     if (interaction.customId === "urzad_pytanie") {
 
         const ticket = await interaction.guild.channels.create({
@@ -437,19 +483,17 @@ Opisz dokładnie swoje pytanie lub problem.`);
     }
 
 
-
-    // ==========================
-    //     ZAMYKANIE TICKETA
-    // ==========================
+    // --------------------------
+    // ZAMYKANIE TICKETA
+    // --------------------------
     if (interaction.customId === "ticket_close") {
         return interaction.channel.delete();
     }
 
 
-
-    // ==========================
-    //     PRZYJĘCIE SPRAWY
-    // ==========================
+    // --------------------------
+    // PRZYJĘCIE SPRAWY
+    // --------------------------
     if (interaction.customId === "ticket_accept") {
 
         if (interaction.user.id !== interaction.guild.ownerId)
@@ -459,6 +503,9 @@ Opisz dokładnie swoje pytanie lub problem.`);
     }
 
 });
+
+client.login("TWÓJ_TOKEN");
+
 
 
 
