@@ -254,26 +254,6 @@ Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
 
     channel.send({ embeds: [embed] });
 });
-const { 
-    Client, 
-    GatewayIntentBits, 
-    EmbedBuilder, 
-    ActionRowBuilder, 
-    ButtonBuilder, 
-    ButtonStyle,
-    StringSelectMenuBuilder,
-    SlashCommandBuilder,
-    REST,
-    Routes
-} = require("discord.js");
-
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
 
 // ==========================
 // REJESTRACJA KOMENDY /urzad
