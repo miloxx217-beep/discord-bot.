@@ -86,12 +86,12 @@ Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie z
             new ButtonBuilder()
                 .setCustomId("dowod_start")
                 .setLabel("Dowód osobisty")
-                .setStyle(ButtonStyle.Primary),
+                .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId("pj_start")
                 .setLabel("Prawo jazdy")
-                .setStyle(ButtonStyle.Success),
+                .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId("urzad_pytanie")
