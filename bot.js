@@ -472,6 +472,46 @@ Nick Roblox: ${nick}`
             });
         }
     }
+// ============================
+// 🔹 PYTANIE DO URZĘDU — TICKET
+// ============================
+if (interaction.customId === "urzad_pytanie") {
+
+    const ticket = await interaction.guild.channels.create({
+        name: `pytanie-${interaction.user.username}`,
+        type: 0,
+        parent: URZAD_CATEGORY_ID,
+        permissionOverwrites: [
+            { id: interaction.guild.id, deny: ["ViewChannel"] },
+            { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+            { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+        ]
+    });
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setDescription(`# ❓ Zapytanie do urzędu
+
+Opisz swój problem lub pytanie, a administracja udzieli Ci odpowiedzi.`);
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("ticket_accept")
+            .setLabel("Przyjmij zgłoszenie")
+            .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+            .setCustomId("ticket_close")
+            .setLabel("Zamknij ticket")
+            .setStyle(ButtonStyle.Danger)
+    );
+
+    ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+    return interaction.reply({
+        content: "Ticket został utworzony!",
+        ephemeral: true
+    });
+}
 
     // ============================
     // 🔹 PRAWO JAZDY — TICKET
