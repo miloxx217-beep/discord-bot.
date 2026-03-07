@@ -28,7 +28,7 @@ client.once("ready", async () => {
     const channel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
 
     const embed = new EmbedBuilder()
-        .setTitle("🎉 Weryfikacja Roblox")
+        .setTitle("<:konfetti:1479756632291410043> Weryfikacja Roblox")
         .setDescription("Kliknij przycisk poniżej aby podać swój **nick Roblox (nie display name)**.")
         .setColor("Orange");
 
@@ -48,7 +48,7 @@ client.on("messageCreate", async (message) => {
 
     if (message.content === "!regulamin") {
         const embed = new EmbedBuilder()
-            .setTitle("📜 Regulamin serwera")
+            .setTitle("<:koperta:1479753910422864064> Regulamin serwera")
             .setDescription(`Witamy na naszym serwerze!
 
 Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
@@ -64,7 +64,7 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
 
         const button = new ButtonBuilder()
             .setCustomId("regulamin_przycisk")
-            .setLabel("📖 Zobacz regulaminy")
+            .setLabel("Zobacz regulaminy")
             .setStyle(ButtonStyle.Secondary);
 
         const row = new ActionRowBuilder().addComponents(button);
@@ -73,7 +73,7 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`)
     }
 
     if (message.content === "!ping") {
-        message.channel.send("Pong! 🏓 Bot działa!");
+        message.channel.send("Pong! <:rakieta:1479756270629031936> Bot działa!");
     }
 });
 
@@ -126,13 +126,13 @@ client.on("interactionCreate", async (interaction) => {
             const adminChannel = interaction.guild.channels.cache.get(ADMIN_CHANNEL_ID);
 
             adminChannel.send(
-                `📝 **Nowa weryfikacja**
+                `<:osoba:1479758104118825155> **Nowa weryfikacja**
 Użytkownik: ${interaction.user.tag}
 Nick Roblox: ${nick}`
             );
 
             interaction.reply({
-                content: "Twój nick został wysłany do weryfikacji ✅",
+                content: "Twój nick został wysłany do weryfikacji <:ptaszek:1479757800232976384>",
                 ephemeral: true
             });
         }
@@ -144,7 +144,7 @@ Nick Roblox: ${nick}`
 
         if (value === "discord") {
             interaction.reply({
-                content: `📜 Regulamin Discord 
+                content: `<:koperta:1479753910422864064> Regulamin Discord 
                 
                 1. Zachowanie ogólne
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
@@ -170,7 +170,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_discord") {
             interaction.reply({
-                content: `⚖️ Taryfikator Discord 
+                content: `<:mlot:1479755213840580650> Taryfikator Discord 
                 
                 1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
@@ -196,7 +196,7 @@ Nick Roblox: ${nick}`
 
         if (value === "roblox") {
             interaction.reply({
-                content: `🎮 Regulamin Roblox
+                content: `<:pad:1479754659857043607> Regulamin Roblox
                 
                 1. FRP – odgrywanie nielogiczne
 2. RDM – zabijanie bez powodu
@@ -212,7 +212,7 @@ Nick Roblox: ${nick}`
 
         if (value === "taryfikator_roblox") {
             interaction.reply({
-                content: `🔨 Taryfikator Roblox 
+                content: `<:mlot:1479755213840580650> Taryfikator Roblox 
                 
                 1. FRP – 1 dzień bana
 2. RDM – 1–3 dni bana
