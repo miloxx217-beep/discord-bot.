@@ -227,7 +227,7 @@ Kliknij przycisk Wymień walutę, aby otworzyć indywidualny ticket obsługi.
 W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
 Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
 
-• Zasady bezpieczeństwa
+# • Zasady bezpieczeństwa
 • Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.
 • Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.
 
