@@ -1,3 +1,4 @@
+console.log("URUCHAMIAM TEN PLIK:", __filename);
 require("dotenv").config();
 const {
     Client, GatewayIntentBits, EmbedBuilder,
