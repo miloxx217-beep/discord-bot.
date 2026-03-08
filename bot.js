@@ -1,4 +1,3 @@
-const db = require("./db.js");
 const {
     Client, GatewayIntentBits, EmbedBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
@@ -6,14 +5,7 @@ const {
     InteractionType, StringSelectMenuBuilder,
     Partials, REST, Routes, SlashCommandBuilder
 } = require("discord.js");
-
-const {
-    hasDowod,
-    createDowod,
-    getUserAccount,
-    createUserAccount,
-    updateBalance
-} = require("./db");
+const fs = require("fs");
 
 // ============================
 // KONFIGURACJA
@@ -61,8 +53,69 @@ const PJ_CE_ROLE_ID = "1479920394831003892";
 // cooldown /pracuj
 const workCooldown = new Map();
 
-// zalogowani do banku
+// ============================
+// DOWODY
+// ============================
+let dowodCounter = 0;
+
+if (fs.existsSync("dowody_counter.txt")) {
+    const val = fs.readFileSync("dowody_counter.txt", "utf8").trim();
+    if (val) dowodCounter = parseInt(val, 10) || 0;
+}
+
+function saveDowodCounter() {
+    fs.writeFileSync("dowody_counter.txt", String(dowodCounter));
+}
+
+let usersWithID = new Set();
+
+if (fs.existsSync("dowody.txt")) {
+    const lines = fs.readFileSync("dowody.txt", "utf8").split("\n");
+    for (const line of lines) {
+        if (line.trim().length > 0) usersWithID.add(line.trim());
+    }
+}
+
+function saveUserID(userId) {
+    fs.appendFileSync("dowody.txt", userId + "\n");
+}
+
+// ============================
+// BANK
+// ============================
+const BANK_FILE = "bank.txt"; // userId|pin|balance
 const loggedInUsers = new Set();
+
+function loadBankData() {
+    if (!fs.existsSync(BANK_FILE)) return {};
+    const lines = fs.readFileSync(BANK_FILE, "utf8").split("\n");
+    const data = {};
+    for (const line of lines) {
+        if (!line.trim()) continue;
+        const [id, pin, balance] = line.split("|");
+        data[id] = { pin, balance: Number(balance) || 0 };
+    }
+    return data;
+}
+
+function saveBankData(data) {
+    const lines = [];
+    for (const id in data) {
+        lines.push(`${id}|${data[id].pin}|${data[id].balance}`);
+    }
+    fs.writeFileSync(BANK_FILE, lines.join("\n"));
+}
+
+function getUserAccount(userId) {
+    const data = loadBankData();
+    return data[userId] || null;
+}
+
+function setUserAccount(userId, pin, balance) {
+    const data = loadBankData();
+    data[userId] = { pin, balance };
+    saveBankData(data);
+}
 
 // ============================
 // SLASH KOMENDY
@@ -139,15 +192,15 @@ Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
 
-# • Dowód osobisty
+• Dowód osobisty
 Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
 
-# • Prawo jazdy
+• Prawo jazdy
 Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
 Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
 Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
 
-# • Zapytanie do urzędu
+• Zapytanie do urzędu
 Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
@@ -176,24 +229,24 @@ Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą ind
             .setDescription(
 `# <:mlot:1479760749541855362> Bank 
 
-Witamy w oficjalnym systemie bankowym serwera.
-Bank zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
+Witamy w oficjalnym systemie bankowym serwera.  
+Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
 
-# - Dostępne usługi:
-• Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.
-• Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.
+## - Dostępne usługi:
+• Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.  
+• Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.  
 
-# - Logowanie i bezpieczeństwo
-Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.
+## - Logowanie i bezpieczeństwo
+Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.  
 Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie 4‑cyfrowego PIN-u, który będzie służył jako zabezpieczenie Twojego konta.
 
-PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.
+PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.  
 
-# - Informacje dodatkowe
-• Każdy gracz może posiadać tylko jedno konto bankowe.
-• Przelewy są realizowane natychmiastowo.
+## - Informacje dodatkowe
+• Każdy gracz może posiadać tylko jedno konto bankowe.  
+• Przelewy są realizowane natychmiastowo.  
 
-Dziękujemy za korzystanie z usług Banku.
+Dziękujemy za korzystanie z usług Banku.  
 Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
 
         const rowBank = new ActionRowBuilder().addComponents(
@@ -219,7 +272,7 @@ Witamy w oficjalnym Kantorze, miejscu przeznaczonym do bezpiecznej i przejrzyste
 # • Informacje o kursie wymiany
 Aktualny kurs walut został ustalony przez Bank i obowiązuje wszystkich graczy serwera:
 
-**• 8000€ w grze → 4000$ na serwerze**
+• 8000€ w grze → 4000$ na serwerze
 
 # • Jak działa wymiana?
 Proces wymiany waluty jest prosty i w pełni bezpieczny:
@@ -288,8 +341,6 @@ client.on("messageCreate", async (message) => {
             .setDescription(
 `# <:koperta:1479760548500471830> Regulamin serwera
 
-Witamy na naszym serwerze!
-
 Kliknij przycisk poniżej i wybierz regulamin który chcesz przeczytać.
 
 Dostępne:
@@ -313,6 +364,7 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`);
         await message.channel.send("Pong! <:rakieta:1479760849835917342> Bot działa!");
     }
 });
+
 // ============================
 // INTERAKCJE
 // ============================
@@ -356,16 +408,8 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // DOWÓD — sprawdzenie w SQLite
+        // DOWÓD
         if (interaction.customId === "dowod_start") {
-
-            if (await hasDowod(interaction.user.id)) {
-                return interaction.reply({
-                    content: "❌ Masz już dowód osobisty.",
-                    ephemeral: true
-                });
-            }
-
             const modal = new ModalBuilder()
                 .setCustomId("dowod_modal")
                 .setTitle("Wniosek o dowód osobisty");
@@ -412,7 +456,7 @@ client.on("interactionCreate", async (interaction) => {
                 .setDescription(
 `Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
 
-- Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
+- Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.  
 - Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
 
             const menu = new StringSelectMenuBuilder()
@@ -452,12 +496,12 @@ client.on("interactionCreate", async (interaction) => {
                 .setDescription(
 `# <:osoba:1479761131206611078> Pytanie do urzędu
 
-Witaj w oficjalnym ticketcie Urzędu Miejskiego.
+Witaj w oficjalnym ticketcie Urzędu Miejskiego.  
 To miejsce służy do zgłaszania wszelkich pytań oraz problemów.
 
 W tym ticketcie możesz opisać:
-• swój problem,
-• pytanie dotyczące zasad lub działania serwera,
+• swój problem,  
+• pytanie dotyczące zasad lub działania serwera,   
 • prośbę o pomoc w sprawach technicznych lub organizacyjnych.
 
 Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze i skuteczniejsze rozwiązanie Twojej sprawy.
@@ -532,9 +576,9 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             return interaction.channel.delete();
         }
 
-        // BANK LOGIN (SQLite)
+        // BANK LOGIN
         if (interaction.customId === "bank_login") {
-            const account = await getUserAccount(interaction.user.id);
+            const account = getUserAccount(interaction.user.id);
 
             if (!account) {
                 const modal = new ModalBuilder()
@@ -592,7 +636,7 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             });
         }
 
-        // BANK SALDO (SQLite)
+        // BANK SALDO
         if (interaction.customId === "bank_saldo") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
@@ -601,7 +645,7 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
                 });
             }
 
-            const account = await getUserAccount(interaction.user.id);
+            const account = getUserAccount(interaction.user.id);
             if (!account) {
                 return interaction.reply({
                     content: "❌ Nie masz konta bankowego.",
@@ -615,7 +659,7 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             });
         }
 
-        // BANK PRZELEW MODAL (SQLite)
+        // BANK PRZELEW MODAL
         if (interaction.customId === "bank_przelew") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
@@ -648,7 +692,7 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             return interaction.showModal(modal);
         }
 
-        // KANTOR — OTWARCIE TICKETA
+        // KANTOR — OTWARCIE TICKETA (w wybranej kategorii)
         if (interaction.customId === "kantor_wymiana") {
 
             const ticket = await interaction.guild.channels.create({
@@ -665,18 +709,18 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`<:rakieta:1479760849835917342> Kantor — wymiana waluty
+`Kantor — wymiana waluty
 
 Instrukcja wymiany waluty
 
 1. Kurs wymiany:
-1000€ w grze = 500$ na serwerze.
-Wyślij dowolną ilość waluty w grze na nick: kaloszek77i
+   1000€ w grze = 500$ na serwerze.
+   Wyślij dowolną ilość waluty w grze na nick: kaloszek77i
 
 2. Zrób pełnoekranowy zrzut ekranu, który musi zawierać:
-• potwierdzenie wysłania waluty,
-• widoczną datę i godzinę,
-• cały ekran (bez przycinania).
+   • potwierdzenie wysłania waluty,
+   • widoczną datę i godzinę,
+   • cały ekran (bez przycinania).
 
 3. Wstaw zrzut ekranu do tego ticketu.
 
@@ -701,7 +745,7 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
             });
         }
 
-        // KANTOR — REALIZACJA (SQLite)
+        // KANTOR — REALIZACJA (tylko właściciel)
         if (interaction.customId === "kantor_realizuj") {
 
             if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
@@ -740,7 +784,7 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
 
             if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
-                    content: "❌ Brak uprawnień.",
+                    content: "❌ Brak upranień.",
                     ephemeral: true
                 });
             }
@@ -770,6 +814,7 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
             });
         }
     }
+
     // MODALE
     if (interaction.type === InteractionType.ModalSubmit) {
 
@@ -792,10 +837,9 @@ Nick Roblox: ${nick}`
             });
         }
 
-        // DOWÓD — SQLite
+        // DOWÓD
         if (interaction.customId === "dowod_modal") {
-
-            if (await hasDowod(interaction.user.id)) {
+            if (usersWithID.has(interaction.user.id)) {
                 return interaction.reply({
                     content: "❌ Masz już wyrobiony dowód osobisty.",
                     ephemeral: true
@@ -807,17 +851,18 @@ Nick Roblox: ${nick}`
             const plec = interaction.fields.getTextInputValue("dowod_plec");
             const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
 
-            const numer = Math.floor(Math.random() * 900000) + 100000;
-
-            await createDowod(interaction.user.id, imie, nazwisko, plec, obywatelstwo, numer);
-
             const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
+
+            dowodCounter++;
+            saveDowodCounter();
+            usersWithID.add(interaction.user.id);
+            saveUserID(interaction.user.id);
 
             if (dowodyChannel) {
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# <:koperta:1479760548500471830> Nowy dowód osobisty  
+`# 📄 Nowy dowód osobisty  
 Użytkownik: ${interaction.user}
 
 Imię: ${imie}
@@ -825,7 +870,7 @@ Nazwisko: ${nazwisko}
 Płeć: ${plec}
 Obywatelstwo: ${obywatelstwo}
 
-Numer dowodu: ${numer}`);
+Numer dowodu: ${dowodCounter}`);
 
                 await dowodyChannel.send({ embeds: [embedData] });
             }
@@ -847,7 +892,7 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            const existing = await getUserAccount(interaction.user.id);
+            const existing = getUserAccount(interaction.user.id);
             if (existing) {
                 return interaction.reply({
                     content: "❌ Masz już konto bankowe.",
@@ -855,7 +900,7 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            await createUserAccount(interaction.user.id, pin);
+            setUserAccount(interaction.user.id, pin, 0);
             loggedInUsers.add(interaction.user.id);
 
             const row = new ActionRowBuilder().addComponents(
@@ -875,7 +920,7 @@ Numer dowodu: ${numer}`);
         // BANK — LOGOWANIE
         if (interaction.customId === "bank_login_modal") {
             const pin = interaction.fields.getTextInputValue("bank_pin_login").trim();
-            const account = await getUserAccount(interaction.user.id);
+            const account = getUserAccount(interaction.user.id);
 
             if (!account) {
                 return interaction.reply({
@@ -909,7 +954,6 @@ Numer dowodu: ${numer}`);
 
         // BANK — PRZELEW
         if (interaction.customId === "bank_transfer_modal") {
-
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
                     content: "❌ Nie jesteś zalogowany do banku.",
@@ -939,7 +983,7 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            const senderAcc = await getUserAccount(interaction.user.id);
+            const senderAcc = getUserAccount(interaction.user.id);
             if (!senderAcc) {
                 return interaction.reply({
                     content: "❌ Nie masz konta bankowego.",
@@ -954,7 +998,7 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            const targetAcc = await getUserAccount(targetId);
+            const targetAcc = getUserAccount(targetId);
             if (!targetAcc) {
                 return interaction.reply({
                     content: "❌ Odbiorca nie ma konta bankowego.",
@@ -962,8 +1006,10 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            await updateBalance(interaction.user.id, -amount);
-            await updateBalance(targetId, amount);
+            const data = loadBankData();
+            data[interaction.user.id].balance -= amount;
+            data[targetId].balance += amount;
+            saveBankData(data);
 
             return interaction.reply({
                 content: `✅ Przelano ${amount} $ do <@${targetId}>.`,
@@ -971,18 +1017,18 @@ Numer dowodu: ${numer}`);
             });
         }
 
-        // KANTOR — REALIZACJA
+        // KANTOR — MODAL (REALIZACJA)
         if (interaction.customId === "kantor_modal") {
 
             if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
-                    content: "❌ Brak uprawnień.",
+                    content: "❌ Nie masz uprawnień.",
                     ephemeral: true
                 });
             }
 
-            const userId = interaction.fields.getTextInputValue("kantor_id").trim();
-            const kwotaRaw = interaction.fields.getTextInputValue("kantor_kwota").trim();
+            const userId = interaction.fields.getTextInputValue("kantor_id");
+            const kwotaRaw = interaction.fields.getTextInputValue("kantor_kwota");
             const kwota = Number(kwotaRaw);
 
             if (isNaN(kwota) || kwota <= 0) {
@@ -992,7 +1038,7 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            const account = await getUserAccount(userId);
+            const account = getUserAccount(userId);
             if (!account) {
                 return interaction.reply({
                     content: "❌ Ten użytkownik nie ma konta bankowego.",
@@ -1000,7 +1046,9 @@ Numer dowodu: ${numer}`);
                 });
             }
 
-            await updateBalance(userId, kwota);
+            const data = loadBankData();
+            data[userId].balance += kwota;
+            saveBankData(data);
 
             await interaction.channel.send(
                 `Realizacja kantoru\nUżytkownik <@${userId}> otrzymał ${kwota}$.`
@@ -1025,6 +1073,20 @@ Numer dowodu: ${numer}`);
                     content:
 `Regulamin Discord
 
+1. Zachowuj się kulturalnie i z szacunkiem wobec innych.
+2. Zabronione jest obrażanie, wyzywanie i grożenie innym.
+3. Spamowanie lub floodowanie jest niedozwolone.
+4. Korzystaj z kanałów zgodnie z ich przeznaczeniem.
+5. Nie publikuj treści NSFW ani materiałów nielegalnych.`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "roblox") {
+                return interaction.reply({
+                    content:
+`Regulamin Roblox
+
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
 1.3 Spamowanie lub floodowanie → niedozwolone.
@@ -1042,24 +1104,6 @@ Numer dowodu: ${numer}`);
 4.1 Materiały i linki muszą być legalne.
 4.2 Reklama bez zgody administracji jest zabroniona.
 4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
-                    ephemeral: true
-                });
-            }
-
-            if (value === "roblox") {
-                return interaction.reply({
-                    content:
-`Regulamin Roblox
-
-Zakazuje się:
-1. FRP – odgrywanie nielogiczne  
-2. RDM – zabijanie bez powodu  
-3. VDM – zabijanie pojazdami  
-4. Power Gaming  
-5. Meta Gaming  
-6. Cheaty / Exploity  
-7. Podszywanie się pod administrację  
-8. Reklama / linki phishingowe`,
                     ephemeral: true
                 });
             }
@@ -1101,9 +1145,9 @@ Zakazuje się:
 3. VDM – 1–3 dni bana  
 4. Power Gaming – 3 dni bana  
 5. Meta Gaming – 3 dni bana  
-6. Cheaty / Exploity – PERMANENTNY BAN  
+6. Cheaty / Exploity – permanentny ban  
 7. Podszywanie się pod administrację – 7 dni bana  
-8. Reklama / linki phishingowe – PERMANENTNY BAN`,
+8. Reklama / phishing – permanentny ban`,
                     ephemeral: true
                 });
             }
@@ -1128,7 +1172,13 @@ Zakazuje się:
                 .setDescription(
 `# <:koperta:1479760548500471830> Wniosek o prawo jazdy
 
-Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
+Dziękujemy za złożenie wniosku o wydanie prawa jazdy.
+Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
+
+Na tym etapie nie musisz podawać żadnych dodatkowych danych.
+Prosimy jedynie o cierpliwość — egzaminator skontaktuje się z Tobą w ciągu 24 godzin, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
+
+Aby usprawnić procedurę, prosimy o podanie w tym ticketcie dogodnej dla Ciebie godziny, w której egzaminator może się z Tobą skontaktować.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -1144,7 +1194,75 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
             await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
 
             return interaction.reply({
-                content: "Twój wniosek został zarejestrowany!",
+                content: "Ticket został utworzony!",
+                ephemeral: true
+            });
+        }
+
+        // SKLEP — ZAKUP
+        if (interaction.customId === "sklep_select") {
+            const choice = interaction.values[0];
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            const prices = {
+                "premium_8000": 8000,
+                "pj_B_3500": 3500,
+                "pj_A_3000": 3000,
+                "pj_T_2000": 2000,
+                "pj_C_4000": 4000,
+                "pj_D_4500": 4500,
+                "pj_CE_5000": 5000
+            };
+
+            const names = {
+                "premium_8000": "Ranga Premium",
+                "pj_B_3500": "Prawo jazdy B",
+                "pj_A_3000": "Prawo jazdy A",
+                "pj_T_2000": "Prawo jazdy T",
+                "pj_C_4000": "Prawo jazdy C",
+                "pj_D_4500": "Prawo jazdy D",
+                "pj_CE_5000": "Prawo jazdy C+E"
+            };
+
+            const roles = {
+                "premium_8000": PREMIUM_ROLE_ID,
+                "pj_B_3500": PJ_B_ROLE_ID,
+                "pj_A_3000": PJ_A_ROLE_ID,
+                "pj_T_2000": PJ_T_ROLE_ID,
+                "pj_C_4000": PJ_C_ROLE_ID,
+                "pj_D_4500": PJ_D_ROLE_ID,
+                "pj_CE_5000": PJ_CE_ROLE_ID
+            };
+
+            const price = prices[choice];
+            const name = names[choice];
+            const roleId = roles[choice];
+
+            if (account.balance < price) {
+                return interaction.reply({
+                    content: `❌ Nie masz wystarczających środków. Potrzebujesz ${price} $.`,
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[interaction.user.id].balance -= price;
+            saveBankData(data);
+
+            const role = interaction.guild.roles.cache.get(roleId);
+            if (role) {
+                await interaction.member.roles.add(role);
+            }
+
+            return interaction.reply({
+                content: `✅ Zakupiono: ${name} za ${price} $.`,
                 ephemeral: true
             });
         }
@@ -1153,10 +1271,10 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
     // SLASH KOMENDY
     if (interaction.isChatInputCommand()) {
 
-        // /pracuj — SQLite
+        // /pracuj
         if (interaction.commandName === "pracuj") {
 
-            const account = await getUserAccount(interaction.user.id);
+            const account = getUserAccount(interaction.user.id);
             if (!account) {
                 return interaction.reply({
                     content: "❌ Nie masz konta bankowego. Najpierw zaloguj się w kanale bank.",
@@ -1182,8 +1300,9 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
 
             const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
 
-            await updateBalance(interaction.user.id, amount);
-            const updated = await getUserAccount(interaction.user.id);
+            const data = loadBankData();
+            data[interaction.user.id].balance += amount;
+            saveBankData(data);
 
             const guild = interaction.guild;
             const workChannel = guild.channels.cache.get(PRACUJ_CHANNEL_ID);
@@ -1192,7 +1311,7 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
                 .setColor("Orange")
                 .setTitle("Praca wykonana")
                 .setDescription(
-                    `${interaction.user} wykonał pracę.\n\nOtrzymał: ${amount} $\nNowe saldo: ${updated.balance} $`
+                    `${interaction.user} wykonał pracę.\n\nOtrzymał: ${amount} $\nNowe saldo: ${data[interaction.user.id].balance} $`
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
 
@@ -1201,12 +1320,12 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
             }
 
             return interaction.reply({
-                content: "✅ Twoja praca została zarejestrowana.",
+                content: "✅ Twoja praca została zarejestrowana. Sprawdź kanał pracy, aby zobaczyć szczegóły.",
                 ephemeral: true
             });
         }
 
-        // /dodajkase — SQLite
+        // /dodajkase — tylko właściciel (rola)
         if (interaction.commandName === "dodajkase") {
 
             if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
@@ -1226,7 +1345,7 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
                 });
             }
 
-            const account = await getUserAccount(user.id);
+            const account = getUserAccount(user.id);
             if (!account) {
                 return interaction.reply({
                     content: "❌ Ten użytkownik nie ma konta bankowego.",
@@ -1234,16 +1353,18 @@ Dziękujemy za złożenie wniosku o wydanie prawa jazdy.`);
                 });
             }
 
-            await updateBalance(user.id, kwota);
-            const updated = await getUserAccount(user.id);
+            const data = loadBankData();
+            data[user.id].balance += kwota;
+            saveBankData(data);
 
             return interaction.reply({
-                content: `✅ Dodano ${kwota} $ do konta ${user}.\nNowe saldo: ${updated.balance} $`,
+                content: `✅ Dodano ${kwota} $ do konta ${user}.\nNowe saldo: ${data[user.id].balance} $`,
                 ephemeral: true
             });
         }
     }
 });
+
 // ============================
 // POWITANIE
 // ============================
@@ -1254,8 +1375,7 @@ client.on("guildMemberAdd", async (member) => {
     const embed = new EmbedBuilder()
         .setColor("Orange")
         .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!<:konfetti:1479760987790770288>
-        Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
         .setThumbnail(member.user.displayAvatarURL());
 
     await channel.send({ embeds: [embed] });
