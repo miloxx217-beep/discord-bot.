@@ -4,8 +4,11 @@ const path = require("path");
 const dbPath = path.join(__dirname, "database.sqlite");
 const db = new sqlite3.Database(dbPath);
 
-// Tworzenie tabel
+// ============================
+// TWORZENIE TABEL
+// ============================
 db.serialize(() => {
+
     // BANK
     db.run(`
         CREATE TABLE IF NOT EXISTS bank (
@@ -35,30 +38,13 @@ db.serialize(() => {
             PRIMARY KEY (userId, kategoria)
         )
     `);
-
-    // SKLEP (logi zakupów)
-    db.run(`
-        CREATE TABLE IF NOT EXISTS sklep_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            userId TEXT,
-            produkt TEXT,
-            cena INTEGER,
-            data TEXT
-        )
-    `);
-
-    // KANTOR (logi)
-    db.run(`
-        CREATE TABLE IF NOT EXISTS kantor_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            userId TEXT,
-            kwota INTEGER,
-            data TEXT
-        )
-    `);
 });
 
-// BANK
+// ============================
+// BANK — FUNKCJE
+// ============================
+
+// Pobieranie konta
 function getUserAccount(userId) {
     return new Promise((resolve, reject) => {
         db.get("SELECT * FROM bank WHERE userId = ?", [userId], (err, row) => {
@@ -68,25 +54,33 @@ function getUserAccount(userId) {
     });
 }
 
+// Tworzenie konta
 function createUserAccount(userId, pin) {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO bank (userId, pin, balance) VALUES (?, ?, 0)", [userId, pin], err => {
-            if (err) reject(err);
-            else resolve();
-        });
+        db.run(
+            "INSERT INTO bank (userId, pin, balance) VALUES (?, ?, 0)",
+            [userId, pin],
+            err => err ? reject(err) : resolve()
+        );
     });
 }
 
+// Aktualizacja salda
 function updateBalance(userId, amount) {
     return new Promise((resolve, reject) => {
-        db.run("UPDATE bank SET balance = balance + ? WHERE userId = ?", [amount, userId], err => {
-            if (err) reject(err);
-            else resolve();
-        });
+        db.run(
+            "UPDATE bank SET balance = balance + ? WHERE userId = ?",
+            [amount, userId],
+            err => err ? reject(err) : resolve()
+        );
     });
 }
 
-// DOWODY
+// ============================
+// DOWODY — FUNKCJE
+// ============================
+
+// Tworzenie dowodu
 function createDowod(userId, imie, nazwisko, plec, obywatelstwo, numer) {
     return new Promise((resolve, reject) => {
         db.run(
@@ -97,16 +91,20 @@ function createDowod(userId, imie, nazwisko, plec, obywatelstwo, numer) {
     });
 }
 
+// Sprawdzanie czy dowód istnieje
 function hasDowod(userId) {
     return new Promise((resolve, reject) => {
         db.get("SELECT * FROM dowody WHERE userId = ?", [userId], (err, row) => {
             if (err) reject(err);
-            else resolve(!!row);
+            else resolve(!!row); // true jeśli istnieje
         });
     });
 }
 
-// PRAWO JAZDY
+// ============================
+// PRAWO JAZDY — FUNKCJE
+// ============================
+
 function addPrawko(userId, kategoria) {
     return new Promise((resolve, reject) => {
         db.run(
@@ -127,8 +125,10 @@ function hasPrawko(userId, kategoria) {
     });
 }
 
+// ============================
+// EXPORT
+// ============================
 module.exports = {
-    db,
     getUserAccount,
     createUserAccount,
     updateBalance,
@@ -137,4 +137,3 @@ module.exports = {
     addPrawko,
     hasPrawko
 };
-
