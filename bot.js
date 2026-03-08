@@ -251,7 +251,18 @@ Dziękujemy za korzystanie z usług Kantoru.`);
             .setDescription(
 `# <:sklep:1479916476210352239> Sklep
 
-Witamy w oficjalnym sklepie serwera.`);
+Witamy w oficjalnym sklepie serwera.
+To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy serwera.
+
+• Jak działa sklep?
+Po kliknięciu przycisku Otwórz sklep wyświetli Ci się lista dostępnych produktów.
+Każdy zakup jest realizowany automatycznie — środki zostaną pobrane z Twojego konta bankowego, a zakup zostanie natychmiast zapisany w systemie.
+
+• Zasady zakupów
+• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.
+• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.
+
+Dziękujemy za korzystanie ze Sklepu.`);
 
         const rowSklep = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
