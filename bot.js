@@ -50,6 +50,12 @@ const PJ_C_ROLE_ID = "1479920339248091146";
 const PJ_D_ROLE_ID = "1479920368360755415";
 const PJ_CE_ROLE_ID = "1479920394831003892";
 
+// ROLA ZA DOWÓD – PODSTAW SWOJE ID
+const DOWOD_ROLE_ID = "1480272874244804808";
+
+// KANAŁ Z TABELĄ EKONOMII – PODSTAW SWOJE ID
+const ECONOMY_TABLE_CHANNEL_ID = "1480273368891658370";
+
 // cooldown /pracuj
 const workCooldown = new Map();
 
@@ -192,15 +198,15 @@ Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
 
-• Dowód osobisty
+# • Dowód osobisty
 Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
 
-• Prawo jazdy
+# • Prawo jazdy
 Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
 Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
 Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
 
-• Zapytanie do urzędu
+# • Zapytanie do urzędu
 Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
@@ -232,17 +238,17 @@ Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą ind
 Witamy w oficjalnym systemie bankowym serwera.  
 Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
 
-## - Dostępne usługi:
+# - Dostępne usługi:
 • Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.  
 • Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.  
 
-## - Logowanie i bezpieczeństwo
+# - Logowanie i bezpieczeństwo
 Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.  
 Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie 4‑cyfrowego PIN-u, który będzie służył jako zabezpieczenie Twojego konta.
 
 PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.  
 
-## - Informacje dodatkowe
+# - Informacje dodatkowe
 • Każdy gracz może posiadać tylko jedno konto bankowe.  
 • Przelewy są realizowane natychmiastowo.  
 
@@ -327,6 +333,41 @@ Dziękujemy za korzystanie ze Sklepu.`);
 
         await sklepChannel.send({ embeds: [embedSklep], components: [rowSklep] });
     }
+
+    // TABELA EKONOMII CO 5 MINUT
+    const econChannel = guild.channels.cache.get(ECONOMY_TABLE_CHANNEL_ID);
+    if (econChannel) {
+        setInterval(() => {
+            const data = loadBankData();
+            const entries = Object.entries(data);
+
+            if (entries.length === 0) {
+                econChannel.send({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor("Orange")
+                            .setTitle("Tabela ekonomii")
+                            .setDescription("Brak kont bankowych.")
+                    ]
+                });
+                return;
+            }
+
+            entries.sort((a, b) => b[1].balance - a[1].balance);
+
+            const lines = entries.map(([id, acc], index) =>
+                `**${index + 1}.** <@${id}> — **${acc.balance} $**`
+            );
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setTitle("Tabela ekonomii — kto ile ma kasy")
+                .setDescription(lines.join("\n"))
+                .setTimestamp();
+
+            econChannel.send({ embeds: [embed] });
+        }, 5 * 60 * 1000);
+    }
 });
 
 // ============================
@@ -410,6 +451,13 @@ client.on("interactionCreate", async (interaction) => {
 
         // DOWÓD
         if (interaction.customId === "dowod_start") {
+            if (usersWithID.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Masz już wyrobiony dowód osobisty.",
+                    ephemeral: true
+                });
+            }
+
             const modal = new ModalBuilder()
                 .setCustomId("dowod_modal")
                 .setTitle("Wniosek o dowód osobisty");
@@ -709,7 +757,7 @@ Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zosta
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`Kantor — wymiana waluty
+`# <:rakieta:1479760849835917342> Kantor — wymiana waluty
 
 Instrukcja wymiany waluty
 
@@ -862,7 +910,7 @@ Nick Roblox: ${nick}`
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# 📄 Nowy dowód osobisty  
+`# <:koperta:1479760548500471830> Nowy dowód osobisty  
 Użytkownik: ${interaction.user}
 
 Imię: ${imie}
@@ -875,8 +923,17 @@ Numer dowodu: ${dowodCounter}`);
                 await dowodyChannel.send({ embeds: [embedData] });
             }
 
+            // NADAJ RANGĘ ZA DOWÓD
+            const member = interaction.guild.members.cache.get(interaction.user.id);
+            if (member && DOWOD_ROLE_ID !== "ID_ROLI_DOWODU") {
+                const role = interaction.guild.roles.cache.get(DOWOD_ROLE_ID);
+                if (role) {
+                    await member.roles.add(role).catch(() => {});
+                }
+            }
+
             return interaction.reply({
-                content: "Twój wniosek o dowód został wysłany!",
+                content: "Twój wniosek o dowód został wysłany! Otrzymałeś rangę za wyrobienie dowodu (jeśli jest skonfigurowana).",
                 ephemeral: true
             });
         }
@@ -1073,20 +1130,6 @@ Numer dowodu: ${dowodCounter}`);
                     content:
 `Regulamin Discord
 
-1. Zachowuj się kulturalnie i z szacunkiem wobec innych.
-2. Zabronione jest obrażanie, wyzywanie i grożenie innym.
-3. Spamowanie lub floodowanie jest niedozwolone.
-4. Korzystaj z kanałów zgodnie z ich przeznaczeniem.
-5. Nie publikuj treści NSFW ani materiałów nielegalnych.`,
-                    ephemeral: true
-                });
-            }
-
-            if (value === "roblox") {
-                return interaction.reply({
-                    content:
-`Regulamin Roblox
-
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
 1.3 Spamowanie lub floodowanie → niedozwolone.
@@ -1104,6 +1147,24 @@ Numer dowodu: ${dowodCounter}`);
 4.1 Materiały i linki muszą być legalne.
 4.2 Reklama bez zgody administracji jest zabroniona.
 4.3 Postępuj zgodnie z poleceniami administracji i moderatorów.`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "roblox") {
+                return interaction.reply({
+                    content:
+`Regulamin Roblox
+
+Zakazuje się:
+1. FRP – odgrywanie nielogiczne  
+2. RDM – zabijanie bez powodu  
+3. VDM – zabijanie pojazdami  
+4. Power Gaming  
+5. Meta Gaming  
+6. Cheaty / Exploity  
+7. Podszywanie się pod administrację  
+8. Reklama / linki phishingowe`,
                     ephemeral: true
                 });
             }
@@ -1145,9 +1206,9 @@ Numer dowodu: ${dowodCounter}`);
 3. VDM – 1–3 dni bana  
 4. Power Gaming – 3 dni bana  
 5. Meta Gaming – 3 dni bana  
-6. Cheaty / Exploity – permanentny ban  
+6. Cheaty / Exploity – PERMANENTNY BAN  
 7. Podszywanie się pod administrację – 7 dni bana  
-8. Reklama / phishing – permanentny ban`,
+8. Reklama / linki phishingowe – PERMANENTNY BAN`,
                     ephemeral: true
                 });
             }
@@ -1345,12 +1406,11 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie dogodnej dla Ciebie
                 });
             }
 
-            const account = getUserAccount(user.id);
+            let account = getUserAccount(user.id);
             if (!account) {
-                return interaction.reply({
-                    content: "❌ Ten użytkownik nie ma konta bankowego.",
-                    ephemeral: true
-                });
+                // jeśli nie ma konta – tworzymy z PIN-em 0000 i saldem 0
+                setUserAccount(user.id, "0000", 0);
+                account = getUserAccount(user.id);
             }
 
             const data = loadBankData();
@@ -1375,7 +1435,8 @@ client.on("guildMemberAdd", async (member) => {
     const embed = new EmbedBuilder()
         .setColor("Orange")
         .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!<:rakieta:1479760849835917342>
+        Pamiętaj, aby przejść weryfikację i zapoznać się z regulaminem.`)
         .setThumbnail(member.user.displayAvatarURL());
 
     await channel.send({ embeds: [embed] });
