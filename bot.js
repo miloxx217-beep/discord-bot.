@@ -138,15 +138,15 @@ Witaj w oficjalnym panelu Urzędu Miejskiego.
 
 Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
 
-• Dowód osobisty
+# • Dowód osobisty
 Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
 
-• Prawo jazdy
+# • Prawo jazdy
 Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
 Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
 Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
 
-• Zapytanie do urzędu
+# • Zapytanie do urzędu
 Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
 
         const rowUrzad = new ActionRowBuilder().addComponents(
