@@ -1,4 +1,4 @@
-
+require("dotenv").config();
 const {
     Client, GatewayIntentBits, EmbedBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
@@ -1264,5 +1264,4 @@ client.on("guildMemberAdd", async (member) => {
 // ============================
 // START
 // ============================
-console.log("TOKEN:", process.env.TOKEN);
 client.login(process.env.TOKEN);
