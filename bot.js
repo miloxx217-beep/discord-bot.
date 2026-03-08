@@ -39,6 +39,9 @@ const PRACUJ_CHANNEL_ID = "1479872708928864388";
 // Kategoria, w której mają się pojawiać tickety kantoru
 const KANTOR_TICKET_CATEGORY_ID = "1480134306495201300";
 
+// Rola właściciel
+const WLASCICIEL_ROLE_ID = "1478754923142316276";
+
 const PREMIUM_ROLE_ID = "1479920896759173377";
 const PJ_B_ROLE_ID = "1479920137749401752";
 const PJ_A_ROLE_ID = "1479920273225678918";
@@ -230,12 +233,12 @@ Witamy w oficjalnym systemie bankowym serwera.
 Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
 
 ## - Dostępne usługi:
-• **Sprawdzenie salda** – natychmiastowy podgląd aktualnego stanu Twojego konta.  
-• **Przelewy między graczami** – szybkie i bezpieczne przesyłanie środków innym graczom.  
+• Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.  
+• Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.  
 
 ## - Logowanie i bezpieczeństwo
-Aby uzyskać dostęp do swojego konta, kliknij przycisk **Zaloguj się** poniżej.  
-Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie **4‑cyfrowego PIN-u**, który będzie służył jako zabezpieczenie Twojego konta.
+Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.  
+Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie 4‑cyfrowego PIN-u, który będzie służył jako zabezpieczenie Twojego konta.
 
 PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.  
 
@@ -266,21 +269,21 @@ Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
 
 Witamy w oficjalnym Kantorze, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
 
-## - Informacje o kursie wymiany
+# • Informacje o kursie wymiany
 Aktualny kurs walut został ustalony przez Bank i obowiązuje wszystkich graczy serwera:
 
-• **8000€ w grze → 4000$ na serwerze**
+• 8000€ w grze → 4000$ na serwerze
 
-## - Jak działa wymiana?
+# • Jak działa wymiana?
 Proces wymiany waluty jest prosty i w pełni bezpieczny:
 
-1. Kliknij przycisk **Wymień walutę**, aby otworzyć indywidualny ticket obsługi.
-2. W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
-3. Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
+Kliknij przycisk Wymień walutę, aby otworzyć indywidualny ticket obsługi.
+W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
+Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
 
-## - Zasady bezpieczeństwa
-• Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.  
-• Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.  
+# • Zasady bezpieczeństwa
+• Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.
+• Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.
 
 Dziękujemy za korzystanie z usług Kantoru.`);
 
@@ -302,16 +305,16 @@ Dziękujemy za korzystanie z usług Kantoru.`);
             .setDescription(
 `# <:sklep:1479916476210352239> Sklep
 
-Witamy w oficjalnym sklepie serwera.  
+Witamy w oficjalnym sklepie serwera.
 To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy serwera.
 
-## - Jak działa sklep?
-Po kliknięciu przycisku **Otwórz sklep** wyświetli Ci się lista dostępnych produktów.  
+# • Jak działa sklep?
+Po kliknięciu przycisku Otwórz sklep wyświetli Ci się lista dostępnych produktów.
 Każdy zakup jest realizowany automatycznie — środki zostaną pobrane z Twojego konta bankowego, a zakup zostanie natychmiast zapisany w systemie.
 
-## - Zasady zakupów
-• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.  
-• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.  
+# • Zasady zakupów
+• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.
+• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.
 
 Dziękujemy za korzystanie ze Sklepu.`);
 
@@ -453,7 +456,7 @@ client.on("interactionCreate", async (interaction) => {
                 .setDescription(
 `Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
 
-- **Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.**  
+- Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.  
 - Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
 
             const menu = new StringSelectMenuBuilder()
@@ -496,7 +499,6 @@ client.on("interactionCreate", async (interaction) => {
 Witaj w oficjalnym ticketcie Urzędu Miejskiego.  
 To miejsce służy do zgłaszania wszelkich pytań oraz problemów.
 
-## - Jak korzystać z ticketu?
 W tym ticketcie możesz opisać:
 • swój problem,  
 • pytanie dotyczące zasad lub działania serwera,   
@@ -504,11 +506,7 @@ W tym ticketcie możesz opisać:
 
 Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze i skuteczniejsze rozwiązanie Twojej sprawy.
 
-## - Zasady obowiązujące w ticketcie
-• Zachowaj kulturę wypowiedzi.  
-• Nie spamuj wiadomościami — każda sprawa zostanie zauważona.  
-
-Dziękujemy za kontakt z Urzędem Miejskim.`);
+Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zostanie zauważona.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -532,11 +530,11 @@ Dziękujemy za kontakt z Urzędem Miejskim.`);
         // PRZYJĘCIE ZGŁOSZENIA
         if (interaction.customId === "ticket_accept") {
             if (
-                interaction.user.id !== interaction.guild.ownerId &&
+                !interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID) &&
                 !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
             ) {
                 return interaction.reply({
-                    content: "❌ Nie masz uprawnień.",
+                    content: "❌ Brak uprawnień.",
                     ephemeral: true
                 });
             }
@@ -566,7 +564,7 @@ Dziękujemy za kontakt z Urzędem Miejskim.`);
         // ZAMKNIĘCIE TICKETA
         if (interaction.customId === "ticket_close") {
             if (
-                interaction.user.id !== interaction.guild.ownerId &&
+                !interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID) &&
                 !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
             ) {
                 return interaction.reply({
@@ -711,22 +709,22 @@ Dziękujemy za kontakt z Urzędem Miejskim.`);
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# <:rakieta:1479760849835917342> Kantor — wymiana waluty
+`Kantor — wymiana waluty
 
 Instrukcja wymiany waluty
 
 1. Kurs wymiany:
    1000€ w grze = 500$ na serwerze.
-   Wyślij dowolną ilość waluty w grze na nick: kaloszek77
+   Wyślij dowolną ilość waluty w grze na nick: kaloszek77i
 
 2. Zrób pełnoekranowy zrzut ekranu, który musi zawierać:
    • potwierdzenie wysłania waluty,
    • widoczną datę i godzinę,
-   • cały ekran.
+   • cały ekran (bez przycinania).
 
 3. Wstaw zrzut ekranu do tego ticketu.
 
-Po sprawdzeniu screena administracja przeliczy walutę według kursu.`);
+Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki zostaną dodane do Twojego konta bankowego.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -747,12 +745,12 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu.`);
             });
         }
 
-        // KANTOR — REALIZACJA (tylko właściciel, przycisk widzą wszyscy)
+        // KANTOR — REALIZACJA (tylko właściciel)
         if (interaction.customId === "kantor_realizuj") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
-                    content: "❌ BRak uprawnień.",
+                    content: "❌ Brak uprawnień.",
                     ephemeral: true
                 });
             }
@@ -784,9 +782,9 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu.`);
         // KANTOR — ZAMKNIĘCIE
         if (interaction.customId === "kantor_zamknij") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
-                    content: "❌ BRak uprawnień.",
+                    content: "❌ Brak upranień.",
                     ephemeral: true
                 });
             }
@@ -827,7 +825,7 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu.`);
 
             if (adminChannel) {
                 await adminChannel.send(
-`<:osoba:1479761131206611078> **Nowa weryfikacja**
+`<:osoba:1479761131206611078> Nowa weryfikacja
 Użytkownik: ${interaction.user.tag}
 Nick Roblox: ${nick}`
                 );
@@ -864,15 +862,15 @@ Nick Roblox: ${nick}`
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# <:koperta:1479760548500471830> Nowy dowód osobisty  
-**Użytkownik:** ${interaction.user}
+`# 📄 Nowy dowód osobisty  
+Użytkownik: ${interaction.user}
 
-**Imię:** ${imie}
-**Nazwisko:** ${nazwisko}
-**Płeć:** ${plec}
-**Obywatelstwo:** ${obywatelstwo}
+Imię: ${imie}
+Nazwisko: ${nazwisko}
+Płeć: ${plec}
+Obywatelstwo: ${obywatelstwo}
 
-**Numer dowodu:** ${dowodCounter}`);
+Numer dowodu: ${dowodCounter}`);
 
                 await dowodyChannel.send({ embeds: [embedData] });
             }
@@ -1014,15 +1012,15 @@ Nick Roblox: ${nick}`
             saveBankData(data);
 
             return interaction.reply({
-                content: `✅ Przelano **${amount} $** do <@${targetId}>.`,
+                content: `✅ Przelano ${amount} $ do <@${targetId}>.`,
                 ephemeral: true
             });
         }
 
-        // KANTOR — MODAL (AUTO KASA + WIADOMOŚĆ)
+        // KANTOR — MODAL (REALIZACJA)
         if (interaction.customId === "kantor_modal") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
                     content: "❌ Nie masz uprawnień.",
                     ephemeral: true
@@ -1053,9 +1051,7 @@ Nick Roblox: ${nick}`
             saveBankData(data);
 
             await interaction.channel.send(
-                `💱 **Realizacja kantoru**\n` +
-                `Użytkownik <@${userId}> otrzymał **${kwota}$**.\n` +
-                `Prosimy o sprawdzenie, czy waluta została poprawnie dodana.`
+                `Realizacja kantoru\nUżytkownik <@${userId}> otrzymał ${kwota}$.`
             );
 
             return interaction.reply({
@@ -1075,7 +1071,21 @@ Nick Roblox: ${nick}`
             if (value === "discord") {
                 return interaction.reply({
                     content:
-`# <:koperta:1479760548500471830> Regulamin Discord
+`Regulamin Discord
+
+1. Zachowuj się kulturalnie i z szacunkiem wobec innych.
+2. Zabronione jest obrażanie, wyzywanie i grożenie innym.
+3. Spamowanie lub floodowanie jest niedozwolone.
+4. Korzystaj z kanałów zgodnie z ich przeznaczeniem.
+5. Nie publikuj treści NSFW ani materiałów nielegalnych.`,
+                    ephemeral: true
+                });
+            }
+
+            if (value === "roblox") {
+                return interaction.reply({
+                    content:
+`Regulamin Roblox
 
 1.1 Zachowuj się kulturalnie i z szacunkiem wobec innych.
 1.2 Zabronione jest obrażanie, wyzywanie i grożenie innym.
@@ -1098,27 +1108,10 @@ Nick Roblox: ${nick}`
                 });
             }
 
-            if (value === "roblox") {
-                return interaction.reply({
-                    content:
-`# <:pad:1479760675533492224> Regulamin Roblox 
-
-1. FRP – odgrywanie nielogiczne  
-2. RDM – zabijanie bez powodu  
-3. VDM – zabijanie pojazdami  
-4. Power Gaming  
-5. Meta Gaming  
-6. Cheaty / Exploity  
-7. Podszywanie się pod administrację  
-8. Reklama / linki phishingowe`,
-                    ephemeral: true
-                });
-            }
-
             if (value === "taryfikator_discord") {
                 return interaction.reply({
                     content:
-`# <:mlot:1479760749541855362> Taryfikator Discord
+`Taryfikator Discord
 
 1. Zachowanie ogólne
 1.1 Obraźliwe zachowanie → Ostrzeżenie
@@ -1145,16 +1138,16 @@ Nick Roblox: ${nick}`
             if (value === "taryfikator_roblox") {
                 return interaction.reply({
                     content:
-`# <:mlot:1479760749541855362> Taryfikator Roblox
+`Taryfikator Roblox
 
 1. FRP – 1 dzień bana  
 2. RDM – 1–3 dni bana  
 3. VDM – 1–3 dni bana  
 4. Power Gaming – 3 dni bana  
 5. Meta Gaming – 3 dni bana  
-6. Cheaty / Exploity – PERMANENTNY BAN  
+6. Cheaty / Exploity – permanentny ban  
 7. Podszywanie się pod administrację – 7 dni bana  
-8. Reklama / linki phishingowe – PERMANENTNY BAN`,
+8. Reklama / phishing – permanentny ban`,
                     ephemeral: true
                 });
             }
@@ -1179,13 +1172,13 @@ Nick Roblox: ${nick}`
                 .setDescription(
 `# <:koperta:1479760548500471830> Wniosek o prawo jazdy
 
-Dziękujemy za złożenie wniosku o wydanie prawa jazdy.  
+Dziękujemy za złożenie wniosku o wydanie prawa jazdy.
 Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
 
-Na tym etapie nie musisz podawać żadnych dodatkowych danych.  
-Prosimy jedynie o cierpliwość — **egzaminator skontaktuje się z Tobą w ciągu 24 godzin**, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
+Na tym etapie nie musisz podawać żadnych dodatkowych danych.
+Prosimy jedynie o cierpliwość — egzaminator skontaktuje się z Tobą w ciągu 24 godzin, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
 
-Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Ciebie godziny**, w której egzaminator może się z Tobą skontaktować.`);
+Aby usprawnić procedurę, prosimy o podanie w tym ticketcie dogodnej dla Ciebie godziny, w której egzaminator może się z Tobą skontaktować.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -1254,7 +1247,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
 
             if (account.balance < price) {
                 return interaction.reply({
-                    content: `❌ Nie masz wystarczających środków. Potrzebujesz **${price} $**.`,
+                    content: `❌ Nie masz wystarczających środków. Potrzebujesz ${price} $.`,
                     ephemeral: true
                 });
             }
@@ -1269,7 +1262,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             }
 
             return interaction.reply({
-                content: `✅ Zakupiono: **${name}** za **${price} $**.\n🎉 Otrzymałeś rolę: **${role?.name || "Nie znaleziono roli"}**`,
+                content: `✅ Zakupiono: ${name} za ${price} $.`,
                 ephemeral: true
             });
         }
@@ -1298,7 +1291,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
                 const minutes = Math.ceil(remaining / 60000);
 
                 return interaction.reply({
-                    content: `⏳ Możesz ponownie pracować za **${minutes} minut**.`,
+                    content: `⏳ Możesz ponownie pracować za ${minutes} minut.`,
                     ephemeral: true
                 });
             }
@@ -1316,12 +1309,9 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
 
             const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setTitle("🛠️ Praca wykonana!")
+                .setTitle("Praca wykonana")
                 .setDescription(
-                    `**${interaction.user} wykonał pracę!**  
-
-💵 Otrzymał: **${amount} $**  
-💰 Nowe saldo: **${data[interaction.user.id].balance} $**`
+                    `${interaction.user} wykonał pracę.\n\nOtrzymał: ${amount} $\nNowe saldo: ${data[interaction.user.id].balance} $`
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
 
@@ -1330,17 +1320,17 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             }
 
             return interaction.reply({
-                content: "✅ Twoja praca została zarejestrowana. Sprawdź kanał pracy, aby zobaczyć embed.",
+                content: "✅ Twoja praca została zarejestrowana. Sprawdź kanał pracy, aby zobaczyć szczegóły.",
                 ephemeral: true
             });
         }
 
-        // /dodajkase — tylko właściciel
+        // /dodajkase — tylko właściciel (rola)
         if (interaction.commandName === "dodajkase") {
 
-            if (interaction.user.id !== interaction.guild.ownerId) {
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
                 return interaction.reply({
-                    content: "❌ Tylko właściciel serwera może używać tej komendy.",
+                    content: "❌ Nie masz uprawnień do tej komendy.",
                     ephemeral: true
                 });
             }
@@ -1368,7 +1358,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             saveBankData(data);
 
             return interaction.reply({
-                content: `✅ Dodano **${kwota} $** do konta ${user}.\nNowe saldo: **${data[user.id].balance} $**`,
+                content: `✅ Dodano ${kwota} $ do konta ${user}.\nNowe saldo: ${data[user.id].balance} $`,
                 ephemeral: true
             });
         }
