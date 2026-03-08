@@ -8,7 +8,7 @@ const {
 const fs = require("fs");
 
 // ============================
-// 🔹 KONFIGURACJA BOTA / SERWERA
+// KONFIGURACJA
 // ============================
 const client = new Client({
     intents: [
@@ -31,13 +31,14 @@ const URZAD_PANEL_CHANNEL_ID = "1479789580118130869";
 const DOWODY_CHANNEL_ID = "1479848426295267470";
 const EGZAMINATOR_ROLE_ID = "1479868039636844544";
 
-// EKONOMIA — KANAŁY
 const BANK_CHANNEL_ID = "1479903334751015065";
 const KANTOR_CHANNEL_ID = "1479872519799574729";
 const SKLEP_CHANNEL_ID = "1479872602930675923";
-const PRACUJ_CHANNEL_ID = "1479872708928864388"; // kanał pracy + embed /pracuj
+const PRACUJ_CHANNEL_ID = "1479872708928864388";
 
-// ROLE SKLEPU
+// Kategoria, w której mają się pojawiać tickety kantoru
+const KANTOR_TICKET_CATEGORY_ID = "1480134306495201300";
+
 const PREMIUM_ROLE_ID = "1479920896759173377";
 const PJ_B_ROLE_ID = "1479920137749401752";
 const PJ_A_ROLE_ID = "1479920273225678918";
@@ -46,11 +47,11 @@ const PJ_C_ROLE_ID = "1479920339248091146";
 const PJ_D_ROLE_ID = "1479920368360755415";
 const PJ_CE_ROLE_ID = "1479920394831003892";
 
-// COOLDOWN PRACY (1 godzina dla /pracuj)
-const workCooldown = new Map(); // userId → timestamp
+// cooldown /pracuj
+const workCooldown = new Map();
 
 // ============================
-// 🔹 DOWODY — NUMERACJA I LISTA
+// DOWODY
 // ============================
 let dowodCounter = 0;
 
@@ -77,9 +78,9 @@ function saveUserID(userId) {
 }
 
 // ============================
-// 🔹 EKONOMIA — BANK (TXT)
+// BANK
 // ============================
-const BANK_FILE = "bank.txt"; // format: userId|pin|balance
+const BANK_FILE = "bank.txt"; // userId|pin|balance
 const loggedInUsers = new Set();
 
 function loadBankData() {
@@ -114,7 +115,7 @@ function setUserAccount(userId, pin, balance) {
 }
 
 // ============================
-// 🔹 AUTOMATYCZNA REJESTRACJA KOMEND
+// SLASH KOMENDY
 // ============================
 const slashCommands = [
     new SlashCommandBuilder()
@@ -136,12 +137,11 @@ const slashCommands = [
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 // ============================
-// 🔹 READY
+// READY
 // ============================
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
 
-    // Rejestracja komend
     try {
         console.log("Rejestrowanie komend slash...");
         await rest.put(
@@ -231,7 +231,7 @@ Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygod
 
 ## - Dostępne usługi:
 • **Sprawdzenie salda** – natychmiastowy podgląd aktualnego stanu Twojego konta.  
-• **Przelewy między graczami** – szybkie i bezpieczne przesyłanie środków innym mieszkańcom.  
+• **Przelewy między graczami** – szybkie i bezpieczne przesyłanie środków innym graczom.  
 
 ## - Logowanie i bezpieczeństwo
 Aby uzyskać dostęp do swojego konta, kliknij przycisk **Zaloguj się** poniżej.  
@@ -262,12 +262,12 @@ Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
         const embedKantor = new EmbedBuilder()
             .setColor("Orange")
             .setDescription(
-`# <:rakieta:1479760849835917342> Kantor 
+`# <:rakieta:1479760849835917342> Kantor Wymiany Walut
 
-Witamy w oficjalnym Kantorze Miejskim, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
+Witamy w oficjalnym Kantorze, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
 
 ## - Informacje o kursie wymiany
-Aktualny kurs walut został ustalony przez Bank Centralny i obowiązuje wszystkich mieszkańców miasta:
+Aktualny kurs walut został ustalony przez Bank i obowiązuje wszystkich graczy serwera:
 
 • **8000€ w grze → 4000$ na serwerze**
 
@@ -300,10 +300,10 @@ Dziękujemy za korzystanie z usług Kantoru.`);
         const embedSklep = new EmbedBuilder()
             .setColor("Orange")
             .setDescription(
-`# <:sklep:1479916476210352239> Sklep 
+`# <:sklep:1479916476210352239> Sklep
 
 Witamy w oficjalnym sklepie serwera.  
-To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla mieszkańców miasta.
+To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy serwera.
 
 ## - Jak działa sklep?
 Po kliknięciu przycisku **Otwórz sklep** wyświetli Ci się lista dostępnych produktów.  
@@ -327,7 +327,7 @@ Dziękujemy za korzystanie ze Sklepu.`);
 });
 
 // ============================
-// 🔹 KOMENDY TEKSTOWE (bez „pracuj”)
+// MESSAGE
 // ============================
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -360,16 +360,14 @@ Nieznajomość regulaminu nie zwalnia z jego przestrzegania.`);
     if (message.content === "!ping") {
         await message.channel.send("Pong! <:rakieta:1479760849835917342> Bot działa!");
     }
-
-    // UWAGA: brak komendy tekstowej "pracuj" — jest tylko /pracuj
 });
 
 // ============================
-// 🔹 INTERAKCJE
+// INTERAKCJE
 // ============================
 client.on("interactionCreate", async (interaction) => {
 
-    // ---------- PRZYCISKI ----------
+    // PRZYCISKI
     if (interaction.isButton()) {
 
         // WERYFIKACJA
@@ -388,7 +386,7 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // REGULAMINY — OTWARCIE MENU
+        // REGULAMINY
         if (interaction.customId === "regulamin_przycisk") {
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("wybor_regulaminu")
@@ -407,7 +405,7 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // DOWÓD — MODAL
+        // DOWÓD
         if (interaction.customId === "dowod_start") {
             const modal = new ModalBuilder()
                 .setCustomId("dowod_modal")
@@ -447,7 +445,7 @@ client.on("interactionCreate", async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        // PRAWO JAZDY — PANEL
+        // PRAWO JAZDY
         if (interaction.customId === "pj_start") {
             const embed = new EmbedBuilder()
                 .setColor("Orange")
@@ -477,7 +475,7 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // PYTANIE DO URZĘDU — TICKET
+        // PYTANIE DO URZĘDU
         if (interaction.customId === "urzad_pytanie") {
             const ticket = await interaction.guild.channels.create({
                 name: `pytanie-${interaction.user.username}`,
@@ -493,16 +491,15 @@ client.on("interactionCreate", async (interaction) => {
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# <:mlot:1479760749541855362> Pytanie do administracji
+`# <:osoba:1479761131206611078> Pytanie do urzędu
 
 Witaj w oficjalnym ticketcie Urzędu Miejskiego.  
-To miejsce służy do zgłaszania wszelkich pytań, problemów oraz spraw wymagających interwencji administracji.
+To miejsce służy do zgłaszania wszelkich pytań oraz problemów.
 
 ## - Jak korzystać z ticketu?
 W tym ticketcie możesz opisać:
 • swój problem,  
-• pytanie dotyczące zasad lub działania serwera,  
-• zgłoszenie dotyczące innego gracza,  
+• pytanie dotyczące zasad lub działania serwera,   
 • prośbę o pomoc w sprawach technicznych lub organizacyjnych.
 
 Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze i skuteczniejsze rozwiązanie Twojej sprawy.
@@ -511,7 +508,7 @@ Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze
 • Zachowaj kulturę wypowiedzi.  
 • Nie spamuj wiadomościami — każda sprawa zostanie zauważona.  
 
-Dziękujemy za kontakt z Urzędem.`);
+Dziękujemy za kontakt z Urzędem Miejskim.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -561,19 +558,19 @@ Dziękujemy za kontakt z Urzędem.`);
             await interaction.message.edit({ components: [newRow] });
 
             return interaction.reply({
-                content: `✔️ Zgłoszenie zostało przyjęte przez ${interaction.user}.`,
+                content: `<:ptaszek:1479761065850962020> Zgłoszenie zostało przyjęte przez ${interaction.user}.`,
                 ephemeral: false
             });
         }
 
-        // ZAMYKANIE TICKETA
+        // ZAMKNIĘCIE TICKETA
         if (interaction.customId === "ticket_close") {
             if (
                 interaction.user.id !== interaction.guild.ownerId &&
                 !interaction.member.roles.cache.has(EGZAMINATOR_ROLE_ID)
             ) {
                 return interaction.reply({
-                    content: "❌ Tylko egzaminator lub właściciel serwera może zamykać tickety.",
+                    content: "❌ Brak uprawnień.",
                     ephemeral: true
                 });
             }
@@ -581,7 +578,7 @@ Dziękujemy za kontakt z Urzędem.`);
             return interaction.channel.delete();
         }
 
-        // BANK — LOGOWANIE / TWORZENIE KONTA
+        // BANK LOGIN
         if (interaction.customId === "bank_login") {
             const account = getUserAccount(interaction.user.id);
 
@@ -614,7 +611,7 @@ Dziękujemy za kontakt z Urzędem.`);
             }
         }
 
-        // BANK — MENU
+        // BANK MENU
         if (interaction.customId === "bank_menu") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
@@ -641,7 +638,7 @@ Dziękujemy za kontakt z Urzędem.`);
             });
         }
 
-        // BANK — SALDO
+        // BANK SALDO
         if (interaction.customId === "bank_saldo") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
@@ -664,7 +661,7 @@ Dziękujemy za kontakt z Urzędem.`);
             });
         }
 
-        // BANK — PRZELEW (MODAL)
+        // BANK PRZELEW MODAL
         if (interaction.customId === "bank_przelew") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
@@ -697,14 +694,13 @@ Dziękujemy za kontakt z Urzędem.`);
             return interaction.showModal(modal);
         }
 
-        // KANTOR — TICKET
+        // KANTOR — OTWARCIE TICKETA (w wybranej kategorii)
         if (interaction.customId === "kantor_wymiana") {
-            const parent = interaction.channel.parentId || URZAD_CATEGORY_ID;
 
             const ticket = await interaction.guild.channels.create({
                 name: `kantor-${interaction.user.username}`,
                 type: 0,
-                parent: parent,
+                parent: KANTOR_TICKET_CATEGORY_ID,
                 permissionOverwrites: [
                     { id: interaction.guild.id, deny: ["ViewChannel"] },
                     { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
@@ -715,13 +711,35 @@ Dziękujemy za kontakt z Urzędem.`);
             const embed = new EmbedBuilder()
                 .setColor("Orange")
                 .setDescription(
-`# <:konfetti:1479760987790770288> Kantor — wymiana waluty
+`# <:rakieta:1479760849835917342> Kantor — wymiana waluty
 
-Aby wymienić walutę:
-1. Postępuj zgodnie z instrukcjami podanymi przez administrację w tym ticketcie.
-2. Po potwierdzeniu transakcji środki zostaną dodane do Twojego konta na serwerze.`);
+Instrukcja wymiany waluty
 
-            await ticket.send({ content: `${interaction.user}`, embeds: [embed] });
+1. Kurs wymiany:
+   1000€ w grze = 500$ na serwerze.
+   Wyślij dowolną ilość waluty w grze na nick: kaloszek77
+
+2. Zrób pełnoekranowy zrzut ekranu, który musi zawierać:
+   • potwierdzenie wysłania waluty,
+   • widoczną datę i godzinę,
+   • cały ekran.
+
+3. Wstaw zrzut ekranu do tego ticketu.
+
+Po sprawdzeniu screena administracja przeliczy walutę według kursu.`);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("kantor_realizuj")
+                    .setLabel("Zrealizuj kantor")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("kantor_zamknij")
+                    .setLabel("Zamknij kantor")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
 
             return interaction.reply({
                 content: "Ticket kantoru został utworzony!",
@@ -729,7 +747,54 @@ Aby wymienić walutę:
             });
         }
 
-        // SKLEP — OTWARCIE MENU
+        // KANTOR — REALIZACJA (tylko właściciel, przycisk widzą wszyscy)
+        if (interaction.customId === "kantor_realizuj") {
+
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return interaction.reply({
+                    content: "❌ BRak uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("kantor_modal")
+                .setTitle("Realizacja kantoru");
+
+            const idInput = new TextInputBuilder()
+                .setCustomId("kantor_id")
+                .setLabel("ID użytkownika Discord")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const kwotaInput = new TextInputBuilder()
+                .setCustomId("kantor_kwota")
+                .setLabel("Kwota do wypłaty ($)")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(idInput),
+                new ActionRowBuilder().addComponents(kwotaInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // KANTOR — ZAMKNIĘCIE
+        if (interaction.customId === "kantor_zamknij") {
+
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return interaction.reply({
+                    content: "❌ BRak uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            return interaction.channel.delete();
+        }
+
+        // SKLEP — OTWARCIE
         if (interaction.customId === "sklep_open") {
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("sklep_select")
@@ -752,7 +817,7 @@ Aby wymienić walutę:
         }
     }
 
-    // ---------- MODALE ----------
+    // MODALE
     if (interaction.type === InteractionType.ModalSubmit) {
 
         // WERYFIKACJA
@@ -774,7 +839,7 @@ Nick Roblox: ${nick}`
             });
         }
 
-        // DOWÓD — tylko raz
+        // DOWÓD
         if (interaction.customId === "dowod_modal") {
             if (usersWithID.has(interaction.user.id)) {
                 return interaction.reply({
@@ -799,7 +864,7 @@ Nick Roblox: ${nick}`
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# 📄 Nowy dowód osobisty  
+`# <:koperta:1479760548500471830> Nowy dowód osobisty  
 **Użytkownik:** ${interaction.user}
 
 **Imię:** ${imie}
@@ -953,9 +1018,54 @@ Nick Roblox: ${nick}`
                 ephemeral: true
             });
         }
+
+        // KANTOR — MODAL (AUTO KASA + WIADOMOŚĆ)
+        if (interaction.customId === "kantor_modal") {
+
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return interaction.reply({
+                    content: "❌ Nie masz uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            const userId = interaction.fields.getTextInputValue("kantor_id");
+            const kwotaRaw = interaction.fields.getTextInputValue("kantor_kwota");
+            const kwota = Number(kwotaRaw);
+
+            if (isNaN(kwota) || kwota <= 0) {
+                return interaction.reply({
+                    content: "❌ Kwota musi być liczbą dodatnią.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(userId);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Ten użytkownik nie ma konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[userId].balance += kwota;
+            saveBankData(data);
+
+            await interaction.channel.send(
+                `💱 **Realizacja kantoru**\n` +
+                `Użytkownik <@${userId}> otrzymał **${kwota}$**.\n` +
+                `Prosimy o sprawdzenie, czy waluta została poprawnie dodana.`
+            );
+
+            return interaction.reply({
+                content: "✔ Kantor został zrealizowany.",
+                ephemeral: true
+            });
+        }
     }
 
-    // ---------- SELECT MENU ----------
+    // SELECT MENU
     if (interaction.isStringSelectMenu()) {
 
         // REGULAMINY
@@ -1096,7 +1206,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             });
         }
 
-        // SKLEP — ZAKUP + NADAWANIE RÓL
+        // SKLEP — ZAKUP
         if (interaction.customId === "sklep_select") {
             const choice = interaction.values[0];
             const account = getUserAccount(interaction.user.id);
@@ -1165,10 +1275,10 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
         }
     }
 
-    // ---------- SLASH KOMENDY ----------
+    // SLASH KOMENDY
     if (interaction.isChatInputCommand()) {
 
-        // /pracuj — publiczny embed na kanale PRACUJ_CHANNEL_ID + cooldown 1 godzina
+        // /pracuj
         if (interaction.commandName === "pracuj") {
 
             const account = getUserAccount(interaction.user.id);
@@ -1179,7 +1289,6 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
                 });
             }
 
-            // COOLDOWN 1 GODZINA
             const lastWork = workCooldown.get(interaction.user.id);
             const now = Date.now();
             const hour = 60 * 60 * 1000;
@@ -1194,18 +1303,14 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
                 });
             }
 
-            // zapis cooldownu
             workCooldown.set(interaction.user.id, now);
 
-            // losowanie zarobku
             const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
 
-            // zapis do banku
             const data = loadBankData();
             data[interaction.user.id].balance += amount;
             saveBankData(data);
 
-            // embed publiczny na kanale PRACUJ_CHANNEL_ID
             const guild = interaction.guild;
             const workChannel = guild.channels.cache.get(PRACUJ_CHANNEL_ID);
 
@@ -1230,7 +1335,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             });
         }
 
-        // /dodajkase
+        // /dodajkase — tylko właściciel
         if (interaction.commandName === "dodajkase") {
 
             if (interaction.user.id !== interaction.guild.ownerId) {
@@ -1263,8 +1368,7 @@ Aby usprawnić procedurę, prosimy o podanie w tym ticketcie **dogodnej dla Cieb
             saveBankData(data);
 
             return interaction.reply({
-                content: `✅ Dodano **${kwota} $** do konta ${user}.  
-Nowe saldo: **${data[user.id].balance} $**`,
+                content: `✅ Dodano **${kwota} $** do konta ${user}.\nNowe saldo: **${data[user.id].balance} $**`,
                 ephemeral: true
             });
         }
@@ -1272,7 +1376,7 @@ Nowe saldo: **${data[user.id].balance} $**`,
 });
 
 // ============================
-// 🔹 POWITANIE
+// POWITANIE
 // ============================
 client.on("guildMemberAdd", async (member) => {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
@@ -1288,6 +1392,6 @@ client.on("guildMemberAdd", async (member) => {
 });
 
 // ============================
-// 🔹 START BOTA
+// START
 // ============================
 client.login(process.env.TOKEN);
