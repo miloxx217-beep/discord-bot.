@@ -1466,7 +1466,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
         // Tworzymy prywatny kanał
         const channel = await guild.channels.create({
-            name: `pokój-${member.user.username}`,
+            name: `kanał-${member.user.username}`,
             type: 2, // voice
             parent: newState.channel.parentId,
             permissionOverwrites: [
