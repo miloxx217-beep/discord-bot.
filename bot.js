@@ -1,6 +1,6 @@
 const {
     Client, GatewayIntentBits, EmbedBuilder,
-    ActionRowBuilder, ButtonBuilder, ButtonStyle,
+    ActionRowBuilder, ButtonBuilder, ButtonStyle, 
     ModalBuilder, TextInputBuilder, TextInputStyle,
     InteractionType, StringSelectMenuBuilder,
     Partials, REST, Routes, SlashCommandBuilder
@@ -13,6 +13,7 @@ const fs = require("fs");
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
+         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers
