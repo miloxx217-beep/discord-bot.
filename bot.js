@@ -1673,7 +1673,8 @@ client.on("interactionCreate", async (interaction) => {
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isStringSelectMenu()) return;
 
-    const [type, ownerId] = interaction.customId.split("_").slice(1);
+    const parts = interaction.customId.split("_");
+const ownerId = parts[parts.length - 1];
 
     if (interaction.user.id !== ownerId) {
         return interaction.reply({ content: "❌ Nie jesteś właścicielem kanału.", ephemeral: true });
