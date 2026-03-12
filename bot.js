@@ -670,7 +670,6 @@ Opisz swój problem lub pytanie.`);
                 ephemeral: true
             });
         }
-    }
 
     // ============================
     // SELECT MENU
