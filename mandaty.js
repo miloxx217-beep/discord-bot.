@@ -24,13 +24,18 @@ module.exports = (client) => {
 
         const embed = new EmbedBuilder()
             .setColor("Orange")
-            .setTitle("🚓 Wystaw mandat")
             .setDescription(
-`Panel służy funkcjonariuszom policji do wystawiania mandatów.
+                `# <:mlot:1479760749541855362> Wystaw mandat
+Złapałeś obywatela na popełnieniu wykroczenia i musisz nałożyć na niego odpowiednią karę.  
+Poniżej możesz wystawić oficjalny mandat, uzupełniając podstawowe informacje dotyczące zdarzenia.
 
-Kliknij przycisk poniżej, aby otworzyć formularz.
+W formularzu wpisz:
+• nick z Roblox,  
+• opis wykroczenia,  
+• wysokość mandatu zgodną z Kodeksem Ruchu Drogowego.
 
-⚠ Dostęp tylko dla rangi **Policjant**.`);
+Po zatwierdzeniu mandat zostanie zapisany i będzie oczekiwał na spłatę.  
+Pamiętaj, aby wpisywać dane zgodnie z przebiegiem interwencji oraz obowiązującymi przepisami.`);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -105,16 +110,15 @@ Kliknij przycisk poniżej, aby otworzyć formularz.
             const termin = wystawiono + (7 * 24 * 60 * 60 * 1000);
 
             const embed = new EmbedBuilder()
-                .setColor("Red")
-                .setTitle("📄 Nowy mandat")
+                .setColor("Orange")
                 .setDescription(
-`**Sprawca:** ${nick}
+                    `# <:koperta:1479760548500471830> Nowy mandat
+**Sprawca:** ${nick}
 **Wykroczenie:** ${wykroczenie}
 **Kwota:** ${kwota} $
 
 **Wystawił:** ${interaction.user}
-
-**Czas na spłatę:** 7 dni  
+  
 **Termin spłaty:** <t:${Math.floor(termin / 1000)}:D>  
 **Pozostało:** 7 dni`)
                 .setTimestamp();
@@ -123,7 +127,7 @@ Kliknij przycisk poniżej, aby otworzyć formularz.
                 new ButtonBuilder()
                     .setCustomId(`mandat_splac_${interaction.user.id}`)
                     .setLabel("Mandat spłacony")
-                    .setStyle(ButtonStyle.Success)
+                    .setStyle(ButtonStyle.Secondary)
             );
 
             await channel.send({ embeds: [embed], components: [row] });
@@ -150,7 +154,7 @@ Kliknij przycisk poniżej, aby otworzyć formularz.
                 new ButtonBuilder()
                     .setCustomId("mandat_done")
                     .setLabel("✔ Mandat spłacony")
-                    .setStyle(ButtonStyle.Success)
+                    .setStyle(ButtonStyle.Secondary)
                     .setDisabled(true)
             );
 
