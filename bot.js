@@ -16,7 +16,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates // DODANE DO AUTOKANAŁÓW
+        GatewayIntentBits.GuildVoiceStates 
     ],
     partials: [Partials.Channel]
 });
@@ -36,8 +36,12 @@ const BANK_CHANNEL_ID = "1479903334751015065";
 const KANTOR_CHANNEL_ID = "1479872519799574729";
 const SKLEP_CHANNEL_ID = "1479872602930675923";
 const PRACUJ_CHANNEL_ID = "1479872708928864388";
+const CREATE_VOICE_CHANNEL_ID = "1480286281899446314";
 
+// Kategoria, w której mają się pojawiać tickety kantoru
 const KANTOR_TICKET_CATEGORY_ID = "1480134306495201300";
+
+// Rola właściciel
 const WLASCICIEL_ROLE_ID = "1478754923142316276";
 
 const PREMIUM_ROLE_ID = "1479920896759173377";
@@ -47,9 +51,6 @@ const PJ_T_ROLE_ID = "1479920305743986951";
 const PJ_C_ROLE_ID = "1479920339248091146";
 const PJ_D_ROLE_ID = "1479920368360755415";
 const PJ_CE_ROLE_ID = "1479920394831003892";
-
-// AUTOKANAŁY — NOWE
-const CREATE_VOICE_CHANNEL_ID = "1480286281899446314";
 
 // cooldown /pracuj
 const workCooldown = new Map();
@@ -141,7 +142,7 @@ const slashCommands = [
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 // ============================
-// READY — NAPRAWIONE (BEZ DUPLIKATÓW PANELI)
+// READY
 // ============================
 client.once("ready", async () => {
     console.log(`Bot działa jako ${client.user.tag}`);
@@ -160,96 +161,176 @@ client.once("ready", async () => {
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) return;
 
-    async function sendOnce(channelId, payload) {
-        const channel = guild.channels.cache.get(channelId);
-        if (!channel) return;
-        const last = await channel.messages.fetch({ limit: 1 });
-        if (last.size === 0) {
-            await channel.send(payload);
-        }
-    }
-
     // WERYFIKACJA
-    await sendOnce(VERIFY_CHANNEL_ID, {
-        embeds: [
-            new EmbedBuilder()
-                .setColor("Orange")
-                .setDescription(
+    const verifyChannel = guild.channels.cache.get(VERIFY_CHANNEL_ID);
+    if (verifyChannel) {
+        const embedVerify = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
 `# <:konfetti:1479760987790770288> Weryfikacja Roblox 
 
 Kliknij przycisk znajdujący się poniżej, aby wprowadzić swój prawidłowy nick Roblox — wymagamy nazwy konta, a nie display name.
-Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji.`)
-        ],
-        components: [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId("start_verification")
-                    .setLabel("Zweryfikuj się")
-                    .setStyle(ButtonStyle.Secondary)
-            )
-        ]
-    });
+Informacja ta jest potrzebna, abyśmy mogli poprawnie przeprowadzić proces weryfikacji i upewnić się, że podane dane są zgodne z Twoim profilem w grze.
+Prosimy o dokładne wpisanie nicku, z zachowaniem wielkości liter oraz pełnej pisowni, ponieważ wszelkie błędy mogą spowodować konieczność ponownego przejścia weryfikacji.`);
+
+        const rowVerify = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("start_verification")
+                .setLabel("Zweryfikuj się")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await verifyChannel.send({ embeds: [embedVerify], components: [rowVerify] });
+    }
 
     // URZĄD
-    await sendOnce(URZAD_PANEL_CHANNEL_ID, {
-        embeds: [
-            new EmbedBuilder()
-                .setColor("Orange")
-                .setDescription(
+    const urzadChannel = guild.channels.cache.get(URZAD_PANEL_CHANNEL_ID);
+    if (urzadChannel) {
+        const embedUrzad = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
 `# <:mod:1479847501149372467> Urząd Miejski   
-Witaj w oficjalnym panelu Urzędu Miejskiego.`)
-        ],
-        components: [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId("dowod_start").setLabel("Dowód osobisty").setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId("pj_start").setLabel("Prawo jazdy").setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId("urzad_pytanie").setLabel("Zapytanie do urzędu").setStyle(ButtonStyle.Secondary)
-            )
-        ]
-    });
+Witaj w oficjalnym panelu Urzędu Miejskiego.
+
+Poniżej znajdziesz trzy główne sekcje, które pozwolą Ci szybko i wygodnie załatwić najważniejsze sprawy urzędowe na naszym serwerze. Każda z dostępnych opcji prowadzi do osobnego procesu obsługi, dzięki czemu Twoje zgłoszenie trafi dokładnie tam, gdzie powinno.
+
+• Dowód osobisty
+Wybierz tę opcję, jeśli chcesz złożyć wniosek o wydanie dowodu osobistego. Zostaniesz poproszony o podanie podstawowych danych, takich jak imię, nazwisko, płeć oraz obywatelstwo. Po wypełnieniu formularza Twój wniosek zostanie automatycznie przesłany do odpowiedniego działu.
+
+• Prawo jazdy
+Ta sekcja umożliwia złożenie wniosku o prawo jazdy w wybranej kategorii.
+Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.
+Po wybraniu kategorii zostanie utworzony specjalny kanał, w którym dokończysz proces składania wniosku.
+
+• Zapytanie do urzędu
+Jeśli masz pytanie, wątpliwość lub chcesz zgłosić sprawę wymagającą indywidualnego rozpatrzenia, wybierz tę opcję. Otworzy się kanał, w którym będziesz mógł opisać swój problem, a administracja udzieli Ci odpowiedzi.`);
+
+        const rowUrzad = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("dowod_start")
+                .setLabel("Dowód osobisty")
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId("pj_start")
+                .setLabel("Prawo jazdy")
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId("urzad_pytanie")
+                .setLabel("Zapytanie do urzędu")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await urzadChannel.send({ embeds: [embedUrzad], components: [rowUrzad] });
+    }
 
     // BANK
-    await sendOnce(BANK_CHANNEL_ID, {
-        embeds: [
-            new EmbedBuilder()
-                .setColor("Orange")
-                .setDescription(`# Bank — kliknij, aby się zalogować.`)
-        ],
-        components: [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId("bank_login").setLabel("Zaloguj się").setStyle(ButtonStyle.Secondary)
-            )
-        ]
-    });
+    const bankChannel = guild.channels.cache.get(BANK_CHANNEL_ID);
+    if (bankChannel) {
+        const embedBank = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# <:mlot:1479760749541855362> Bank 
+
+Witamy w oficjalnym systemie bankowym serwera.  
+Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
+
+## - Dostępne usługi:
+• Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.  
+• Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.  
+
+## - Logowanie i bezpieczeństwo
+Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.  
+Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie 4‑cyfrowego PIN-u, który będzie służył jako zabezpieczenie Twojego konta.
+
+PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.  
+
+## - Informacje dodatkowe
+• Każdy gracz może posiadać tylko jedno konto bankowe.  
+• Przelewy są realizowane natychmiastowo.  
+
+Dziękujemy za korzystanie z usług Banku.  
+Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
+
+        const rowBank = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("bank_login")
+                .setLabel("Zaloguj się")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await bankChannel.send({ embeds: [embedBank], components: [rowBank] });
+    }
 
     // KANTOR
-    await sendOnce(KANTOR_CHANNEL_ID, {
-        embeds: [
-            new EmbedBuilder()
-                .setColor("Orange")
-                .setDescription(`# Kantor — wymień walutę.`)
-        ],
-        components: [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId("kantor_wymiana").setLabel("Wymień walutę").setStyle(ButtonStyle.Secondary)
-            )
-        ]
-    });
+    const kantorChannel = guild.channels.cache.get(KANTOR_CHANNEL_ID);
+    if (kantorChannel) {
+        const embedKantor = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# <:rakieta:1479760849835917342> Kantor Wymiany Walut
+
+Witamy w oficjalnym Kantorze, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
+
+# • Informacje o kursie wymiany
+Aktualny kurs walut został ustalony przez Bank i obowiązuje wszystkich graczy serwera:
+
+• 8000€ w grze → 4000$ na serwerze
+
+# • Jak działa wymiana?
+Proces wymiany waluty jest prosty i w pełni bezpieczny:
+
+Kliknij przycisk Wymień walutę, aby otworzyć indywidualny ticket obsługi.
+W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
+Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
+
+# • Zasady bezpieczeństwa
+• Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.
+• Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.
+
+Dziękujemy za korzystanie z usług Kantoru.`);
+
+        const rowKantor = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("kantor_wymiana")
+                .setLabel("Wymień walutę")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await kantorChannel.send({ embeds: [embedKantor], components: [rowKantor] });
+    }
 
     // SKLEP
-    await sendOnce(SKLEP_CHANNEL_ID, {
-        embeds: [
-            new EmbedBuilder()
-                .setColor("Orange")
-                .setDescription(`# Sklep — kliknij, aby otworzyć.`)
-        ],
-        components: [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId("sklep_open").setLabel("Otwórz sklep").setStyle(ButtonStyle.Secondary)
-            )
-        ]
-    });
+    const sklepChannel = guild.channels.cache.get(SKLEP_CHANNEL_ID);
+    if (sklepChannel) {
+        const embedSklep = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
+`# <:sklep:1479916476210352239> Sklep
+
+Witamy w oficjalnym sklepie serwera.
+To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy serwera.
+
+# • Jak działa sklep?
+Po kliknięciu przycisku Otwórz sklep wyświetli Ci się lista dostępnych produktów.
+Każdy zakup jest realizowany automatycznie — środki zostaną pobrane z Twojego konta bankowego, a zakup zostanie natychmiast zapisany w systemie.
+
+# • Zasady zakupów
+• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.
+• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.
+
+Dziękujemy za korzystanie ze Sklepu.`);
+
+        const rowSklep = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("sklep_open")
+                .setLabel("Otwórz sklep")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        await sklepChannel.send({ embeds: [embedSklep], components: [rowSklep] });
+    }
 });
+
 // ============================
 // MESSAGE
 // ============================
@@ -378,7 +459,7 @@ client.on("interactionCreate", async (interaction) => {
 `Poniżej wybierz kategorię prawa jazdy, o którą chcesz złożyć wniosek.
 
 - Wymagane jest wcześniejsze zakupienie odpowiedniego prawa jazdy w sklepie serwera.  
-- Po wybraniu kategorii zostanie utworzony specjalny ticket.`);
+- Po wybraniu kategorii zostanie utworzony specjalny ticket, w którym zostanie przeprowadzona dalsza procedura.`);
 
             const menu = new StringSelectMenuBuilder()
                 .setCustomId("pj_kategoria")
@@ -417,7 +498,17 @@ client.on("interactionCreate", async (interaction) => {
                 .setDescription(
 `# <:osoba:1479761131206611078> Pytanie do urzędu
 
-Opisz swój problem lub pytanie.`);
+Witaj w oficjalnym ticketcie Urzędu Miejskiego.  
+To miejsce służy do zgłaszania wszelkich pytań oraz problemów.
+
+W tym ticketcie możesz opisać:
+• swój problem,  
+• pytanie dotyczące zasad lub działania serwera,   
+• prośbę o pomoc w sprawach technicznych lub organizacyjnych.
+
+Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze i skuteczniejsze rozwiązanie Twojej sprawy.
+
+Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zostanie zauważona.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -486,6 +577,306 @@ Opisz swój problem lub pytanie.`);
 
             return interaction.channel.delete();
         }
+
+        // BANK LOGIN
+        if (interaction.customId === "bank_login") {
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                const modal = new ModalBuilder()
+                    .setCustomId("bank_create_modal")
+                    .setTitle("Utwórz konto bankowe");
+
+                const pinInput = new TextInputBuilder()
+                    .setCustomId("bank_pin")
+                    .setLabel("Ustaw 4-cyfrowy PIN")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
+                return interaction.showModal(modal);
+            } else {
+                const modal = new ModalBuilder()
+                    .setCustomId("bank_login_modal")
+                    .setTitle("Logowanie do banku");
+
+                const pinInput = new TextInputBuilder()
+                    .setCustomId("bank_pin_login")
+                    .setLabel("Podaj swój 4-cyfrowy PIN")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
+                return interaction.showModal(modal);
+            }
+        }
+
+        // BANK MENU
+        if (interaction.customId === "bank_menu") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_saldo")
+                    .setLabel("Sprawdź saldo")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("bank_przelew")
+                    .setLabel("Przelej pieniądze")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "Wybierz operację:",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // BANK SALDO
+        if (interaction.customId === "bank_saldo") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(interaction.user.id);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta bankowego.",
+                    ephemeral: true
+                });
+            }
+
+            return interaction.reply({
+                content: `💰 Twoje saldo: **${account.balance} $**`,
+                ephemeral: true
+            });
+        }
+
+        // BANK PRZELEW MODAL
+        if (interaction.customId === "bank_przelew") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany do banku.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("bank_transfer_modal")
+                .setTitle("Przelew bankowy");
+
+            const targetInput = new TextInputBuilder()
+                .setCustomId("bank_transfer_target")
+                .setLabel("Podaj @użytkownika lub jego ID")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const amountInput = new TextInputBuilder()
+                .setCustomId("bank_transfer_amount")
+                .setLabel("Kwota przelewu")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(targetInput),
+                new ActionRowBuilder().addComponents(amountInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // KANTOR — OTWARCIE TICKETA (w wybranej kategorii)
+        if (interaction.customId === "kantor_wymiana") {
+
+            const ticket = await interaction.guild.channels.create({
+                name: `kantor-${interaction.user.username}`,
+                type: 0,
+                parent: KANTOR_TICKET_CATEGORY_ID,
+                permissionOverwrites: [
+                    { id: interaction.guild.id, deny: ["ViewChannel"] },
+                    { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+                ]
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setDescription(
+`Kantor — wymiana waluty
+
+Instrukcja wymiany waluty
+
+1. Kurs wymiany:
+   1000€ w grze = 500$ na serwerze.
+   Wyślij dowolną ilość waluty w grze na nick: kaloszek77i
+
+2. Zrób pełnoekranowy zrzut ekranu, który musi zawierać:
+   • potwierdzenie wysłania waluty,
+   • widoczną datę i godzinę,
+   • cały ekran (bez przycinania).
+
+3. Wstaw zrzut ekranu do tego ticketu.
+
+Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki zostaną dodane do Twojego konta bankowego.`);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("kantor_realizuj")
+                    .setLabel("Zrealizuj kantor")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("kantor_zamknij")
+                    .setLabel("Zamknij kantor")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+            return interaction.reply({
+                content: "Ticket kantoru został utworzony!",
+                ephemeral: true
+            });
+        }
+
+        // KANTOR — REALIZACJA (tylko właściciel)
+        if (interaction.customId === "kantor_realizuj") {
+
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
+                return interaction.reply({
+                    content: "❌ Brak uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("kantor_modal")
+                .setTitle("Realizacja kantoru");
+
+            const idInput = new TextInputBuilder()
+                .setCustomId("kantor_id")
+                .setLabel("ID użytkownika Discord")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const kwotaInput = new TextInputBuilder()
+                .setCustomId("kantor_kwota")
+                .setLabel("Kwota do wypłaty ($)")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(idInput),
+                new ActionRowBuilder().addComponents(kwotaInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // KANTOR — ZAMKNIĘCIE
+        if (interaction.customId === "kantor_zamknij") {
+
+            if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
+                return interaction.reply({
+                    content: "❌ Brak upranień.",
+                    ephemeral: true
+                });
+            }
+
+            return interaction.channel.delete();
+        }
+
+        // SKLEP — OTWARCIE
+        if (interaction.customId === "sklep_open") {
+            const menu = new StringSelectMenuBuilder()
+                .setCustomId("sklep_select")
+                .setPlaceholder("Wybierz, co chcesz kupić")
+                .addOptions(
+                    { label: "Ranga Premium (8000$)", value: "premium_8000" },
+                    { label: "Prawo jazdy B (3500$)", value: "pj_B_3500" },
+                    { label: "Prawo jazdy A (3000$)", value: "pj_A_3000" },
+                    { label: "Prawo jazdy T (2000$)", value: "pj_T_2000" },
+                    { label: "Prawo jazdy C (4000$)", value: "pj_C_4000" },
+                    { label: "Prawo jazdy D (4500$)", value: "pj_D_4500" },
+                    { label: "Prawo jazdy C+E (5000$)", value: "pj_CE_5000" }
+                );
+
+            return interaction.reply({
+                content: "Wybierz przedmiot do zakupu:",
+                components: [new ActionRowBuilder().addComponents(menu)],
+                ephemeral: true
+            });
+        }
+    }
+
+    // MODALE
+    if (interaction.type === InteractionType.ModalSubmit) {
+
+        // WERYFIKACJA
+        if (interaction.customId === "verification_modal") {
+            const nick = interaction.fields.getTextInputValue("roblox_nick");
+            const adminChannel = interaction.guild.channels.cache.get(ADMIN_CHANNEL_ID);
+
+            if (adminChannel) {
+                await adminChannel.send(
+`<:osoba:1479761131206611078> Nowa weryfikacja
+Użytkownik: ${interaction.user.tag}
+Nick Roblox: ${nick}`
+                );
+            }
+
+            return interaction.reply({
+                content: "Twój nick został wysłany do weryfikacji <:ptaszek:1479761065850962020>",
+                ephemeral: true
+            });
+        }
+
+        // DOWÓD
+        if (interaction.customId === "dowod_modal") {
+            if (usersWithID.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Masz już wyrobiony dowód osobisty.",
+                    ephemeral: true
+                });
+            }
+
+            const imie = interaction.fields.getTextInputValue("dowod_imie");
+            const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
+            const plec = interaction.fields.getTextInputValue("dowod_plec");
+            const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
+
+            const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
+
+            dowodCounter++;
+            saveDowodCounter();
+            usersWithID.add(interaction.user.id);
+            saveUserID(interaction.user.id);
+
+            if (dowodyChannel) {
+                const embedData = new EmbedBuilder()
+                    .setColor("Orange")
+                    .setDescription(
+`# 📄 Nowy dowód osobisty  
+Użytkownik: ${interaction.user}
+
+Imię: ${imie}
+Nazwisko: ${nazwisko}
+Płeć: ${plec}
+Obywatelstwo: ${obywatelstwo}
+
+Numer dowodu: ${dowodCounter}`);
+
+                await dowodyChannel.send({ embeds: [embedData] });
+            }
+
             return interaction.reply({
                 content: "Twój wniosek o dowód został wysłany!",
                 ephemeral: true
@@ -670,10 +1061,9 @@ Opisz swój problem lub pytanie.`);
                 ephemeral: true
             });
         }
+    }
 
-    // ============================
     // SELECT MENU
-    // ============================
     if (interaction.isStringSelectMenu()) {
 
         // REGULAMINY
@@ -785,7 +1175,12 @@ Opisz swój problem lub pytanie.`);
 `# <:koperta:1479760548500471830> Wniosek o prawo jazdy
 
 Dziękujemy za złożenie wniosku o wydanie prawa jazdy.
-Egzaminator skontaktuje się z Tobą w ciągu 24 godzin.`);
+Twój wniosek został pomyślnie zarejestrowany w systemie Urzędu Miejskiego.
+
+Na tym etapie nie musisz podawać żadnych dodatkowych danych.
+Prosimy jedynie o cierpliwość — egzaminator skontaktuje się z Tobą w ciągu 24 godzin, aby przekazać dalsze instrukcje dotyczące procesu egzaminacyjnego.
+
+Aby usprawnić procedurę, prosimy o podanie w tym ticketcie dogodnej dla Ciebie godziny, w której egzaminator może się z Tobą skontaktować.`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -875,9 +1270,7 @@ Egzaminator skontaktuje się z Tobą w ciągu 24 godzin.`);
         }
     }
 
-    // ============================
     // SLASH KOMENDY
-    // ============================
     if (interaction.isChatInputCommand()) {
 
         // /pracuj
@@ -934,7 +1327,7 @@ Egzaminator skontaktuje się z Tobą w ciągu 24 godzin.`);
             });
         }
 
-        // /dodajkase — tylko właściciel
+        // /dodajkase — tylko właściciel (rola)
         if (interaction.commandName === "dodajkase") {
 
             if (!interaction.member.roles.cache.has(WLASCICIEL_ROLE_ID)) {
@@ -974,70 +1367,81 @@ Egzaminator skontaktuje się z Tobą w ciągu 24 godzin.`);
     }
 });
 // ============================
-// POWITANIE
-// ============================
-client.on("guildMemberAdd", async (member) => {
-    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
-    if (!channel) return;
-
-    const embed = new EmbedBuilder()
-        .setColor("Orange")
-        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
-        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
-        .setThumbnail(member.user.displayAvatarURL());
-
-    await channel.send({ embeds: [embed] });
-});
-// ============================
-// AUTO-KANAŁY GŁOSOWE (TEMP VOICE)
+// SYSTEM PRYWATNYCH KANAŁÓW GŁOSOWYCH (TEMP VOICE)
 // ============================
 
-const tempVoice = new Map(); // userId -> { channelId, banned: Set() }
+const CREATE_VOICE_CHANNEL_ID = "1480286281899446314";
+
+// Mapa: userId -> { channelId, banned: Set() }
+const tempVoice = new Map();
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
+
     const guild = newState.guild;
     const member = newState.member;
 
-    // Wejście na kanał "stwórz kanał"
+    // -----------------------------
+    // 1. WEJŚCIE DO KANAŁU "STWÓRZ KANAŁ"
+    // -----------------------------
     if (newState.channelId === CREATE_VOICE_CHANNEL_ID) {
 
-        // Jeśli już ma kanał – nic nie rób
+        // Jeśli użytkownik już ma kanał — ignorujemy
         if (tempVoice.has(member.id)) return;
 
-        const baseChannel = newState.channel;
-
+        // Tworzymy prywatny kanał
         const channel = await guild.channels.create({
             name: `kanał-${member.user.username}`,
-            type: 2,
-            parent: baseChannel?.parentId ?? null,
+            type: 2, // voice
+            parent: newState.channel.parentId,
             permissionOverwrites: [
                 { id: guild.id, deny: ["ViewChannel"] },
                 { id: member.id, allow: ["ViewChannel", "Connect", "Speak"] }
             ]
         });
 
+        // Zapisujemy dane
         tempVoice.set(member.id, {
             channelId: channel.id,
             banned: new Set()
         });
 
+        // Przenosimy użytkownika
         await member.voice.setChannel(channel);
 
+        // Pobieramy czat głosowy
+        const voiceChat = channel;
+
+        // Tworzymy panel
         const row1 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`pv_private_${member.id}`).setLabel("🔒 Prywatny").setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId(`pv_public_${member.id}`).setLabel("🔓 Publiczny").setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder()
+                .setCustomId(`pv_private_${member.id}`)
+                .setLabel("🔒 Prywatny")
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(`pv_public_${member.id}`)
+                .setLabel("🔓 Publiczny")
+                .setStyle(ButtonStyle.Secondary)
         );
 
         const row2 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`pv_kick_${member.id}`).setLabel("👢 Wyrzuć").setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId(`pv_ban_${member.id}`).setLabel("⛔ Zbanuj").setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder()
+                .setCustomId(`pv_kick_${member.id}`)
+                .setLabel("👢 Wyrzuć")
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(`pv_ban_${member.id}`)
+                .setLabel("⛔ Zbanuj")
+                .setStyle(ButtonStyle.Secondary)
         );
 
         const row3 = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`pv_limit_${member.id}`).setLabel("🎚 Limit osób").setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder()
+                .setCustomId(`pv_limit_${member.id}`)
+                .setLabel("🎚 Limit osób")
+                .setStyle(ButtonStyle.Secondary)
         );
 
-        await channel.send({
+        await voiceChat.send({
             embeds: [
                 new EmbedBuilder()
                     .setColor("Orange")
@@ -1048,9 +1452,12 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         });
     }
 
-    // Wyjście z kanału – auto delete
+    // -----------------------------
+    // 2. WYJŚCIE Z KANAŁU — AUTO DELETE
+    // -----------------------------
     if (oldState.channelId) {
         const channel = oldState.channel;
+
         if (!channel) return;
 
         const ownerEntry = [...tempVoice.entries()]
@@ -1058,8 +1465,9 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
         if (!ownerEntry) return;
 
-        const [ownerId] = ownerEntry;
+        const [ownerId, data] = ownerEntry;
 
+        // Jeśli kanał pusty → usuń
         if (channel.members.size === 0) {
             await channel.delete().catch(() => {});
             tempVoice.delete(ownerId);
@@ -1068,17 +1476,15 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 });
 
 // ============================
-// PRZYCISKI PANELU TEMP VOICE
+// PRZYCISKI PANELU
 // ============================
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
-    if (!interaction.customId.startsWith("pv_")) return; // nie rusza Twoich przycisków
 
-    const parts = interaction.customId.split("_");
-    const action = parts[1];
-    const ownerId = parts[2];
+    const [action, ownerId] = interaction.customId.split("_").slice(1);
 
+    // Tylko właściciel może klikać
     if (interaction.user.id !== ownerId) {
         return interaction.reply({ content: "❌ Nie jesteś właścicielem kanału.", ephemeral: true });
     }
@@ -1089,18 +1495,29 @@ client.on("interactionCreate", async (interaction) => {
     const channel = interaction.guild.channels.cache.get(data.channelId);
     if (!channel) return;
 
-    if (action === "private") {
+    // -----------------------------
+    // PRYWATNY
+    // -----------------------------
+    if (interaction.customId.startsWith("pv_private")) {
         await channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: false });
         return interaction.reply({ content: "🔒 Kanał ustawiony na prywatny.", ephemeral: true });
     }
 
-    if (action === "public") {
+    // -----------------------------
+    // PUBLICZNY
+    // -----------------------------
+    if (interaction.customId.startsWith("pv_public")) {
         await channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: true });
         return interaction.reply({ content: "🔓 Kanał ustawiony na publiczny.", ephemeral: true });
     }
 
-    if (action === "kick") {
-        const members = [...channel.members.values()].filter(m => m.id !== ownerId);
+    // -----------------------------
+    // WYRZUCANIE
+    // -----------------------------
+    if (interaction.customId.startsWith("pv_kick")) {
+
+        const members = [...channel.members.values()]
+            .filter(m => m.id !== ownerId);
 
         if (members.length === 0) {
             return interaction.reply({ content: "❌ Nie ma kogo wyrzucić.", ephemeral: true });
@@ -1109,7 +1526,12 @@ client.on("interactionCreate", async (interaction) => {
         const menu = new StringSelectMenuBuilder()
             .setCustomId(`pv_kick_select_${ownerId}`)
             .setPlaceholder("Wybierz osobę do wyrzucenia")
-            .addOptions(members.map(m => ({ label: m.user.username, value: m.id })));
+            .addOptions(
+                members.map(m => ({
+                    label: m.user.username,
+                    value: m.id
+                }))
+            );
 
         return interaction.reply({
             content: "Wybierz osobę:",
@@ -1118,8 +1540,13 @@ client.on("interactionCreate", async (interaction) => {
         });
     }
 
-    if (action === "ban") {
-        const members = [...channel.members.values()].filter(m => m.id !== ownerId);
+    // -----------------------------
+    // BANOWANIE
+    // -----------------------------
+    if (interaction.customId.startsWith("pv_ban")) {
+
+        const members = [...channel.members.values()]
+            .filter(m => m.id !== ownerId);
 
         if (members.length === 0) {
             return interaction.reply({ content: "❌ Nie ma kogo zbanować.", ephemeral: true });
@@ -1128,7 +1555,12 @@ client.on("interactionCreate", async (interaction) => {
         const menu = new StringSelectMenuBuilder()
             .setCustomId(`pv_ban_select_${ownerId}`)
             .setPlaceholder("Wybierz osobę do zbanowania")
-            .addOptions(members.map(m => ({ label: m.user.username, value: m.id })));
+            .addOptions(
+                members.map(m => ({
+                    label: m.user.username,
+                    value: m.id
+                }))
+            );
 
         return interaction.reply({
             content: "Wybierz osobę:",
@@ -1137,7 +1569,11 @@ client.on("interactionCreate", async (interaction) => {
         });
     }
 
-    if (action === "limit") {
+    // -----------------------------
+    // LIMIT
+    // -----------------------------
+    if (interaction.customId.startsWith("pv_limit")) {
+
         const modal = new ModalBuilder()
             .setCustomId(`pv_limit_modal_${ownerId}`)
             .setTitle("Ustaw limit osób");
@@ -1149,21 +1585,20 @@ client.on("interactionCreate", async (interaction) => {
             .setRequired(true);
 
         modal.addComponents(new ActionRowBuilder().addComponents(input));
+
         return interaction.showModal(modal);
     }
 });
 
 // ============================
-// SELECT MENU — KICK / BAN
+// SELECT MENU — WYRZUCANIE / BANOWANIE
 // ============================
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isStringSelectMenu()) return;
-    if (!interaction.customId.startsWith("pv_")) return;
 
     const parts = interaction.customId.split("_");
-    const action = parts[1];
-    const ownerId = parts[parts.length - 1];
+const ownerId = parts[parts.length - 1];
 
     if (interaction.user.id !== ownerId) {
         return interaction.reply({ content: "❌ Nie jesteś właścicielem kanału.", ephemeral: true });
@@ -1178,12 +1613,14 @@ client.on("interactionCreate", async (interaction) => {
     const targetId = interaction.values[0];
     const target = channel.members.get(targetId);
 
-    if (action === "kick") {
+    // WYRZUCANIE
+    if (interaction.customId.startsWith("pv_kick_select")) {
         if (target) await target.voice.disconnect();
         return interaction.reply({ content: `👢 Wyrzucono <@${targetId}>.`, ephemeral: true });
     }
 
-    if (action === "ban") {
+    // BANOWANIE
+    if (interaction.customId.startsWith("pv_ban_select")) {
         data.banned.add(targetId);
         await channel.permissionOverwrites.edit(targetId, { Connect: false });
         if (target) await target.voice.disconnect();
@@ -1197,6 +1634,7 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isModalSubmit()) return;
+
     if (!interaction.customId.startsWith("pv_limit_modal")) return;
 
     const ownerId = interaction.customId.split("_").pop();
@@ -1220,6 +1658,23 @@ client.on("interactionCreate", async (interaction) => {
     await channel.setUserLimit(limit);
 
     return interaction.reply({ content: `🎚 Ustawiono limit na **${limit}** osób.`, ephemeral: true });
+});
+
+
+// ============================
+// POWITANIE
+// ============================
+client.on("guildMemberAdd", async (member) => {
+    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    if (!channel) return;
+
+    const embed = new EmbedBuilder()
+        .setColor("Orange")
+        .setTitle("<:osoba:1479761131206611078> Nowy gracz na serwerze!")
+        .setDescription(`Witaj ${member.user}, cieszymy się, że dołączyłeś do naszej społeczności!`)
+        .setThumbnail(member.user.displayAvatarURL());
+
+    await channel.send({ embeds: [embed] });
 });
 
 // ============================
