@@ -1622,6 +1622,8 @@ client.on("guildMemberAdd", async (member) => {
 // ============================
 // START
 // ============================
+require("./modules/ranking.js")(client);
+
 require("./mandaty.js")(client);
 
 client.login(process.env.TOKEN);
