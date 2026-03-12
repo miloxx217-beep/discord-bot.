@@ -4,7 +4,7 @@ module.exports = (client) => {
     const { EmbedBuilder } = require("discord.js");
 
     const BANK_FILE = "bank.txt"; // ten sam plik co w bot.js
-    const RANKING_CHANNEL_ID = "TUTAJ_WKLEJ_ID_KANAŁU";
+    const RANKING_CHANNEL_ID = "1480273368891658370";
 
     function loadBankData() {
         if (!fs.existsSync(BANK_FILE)) return {};
