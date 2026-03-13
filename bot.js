@@ -872,7 +872,7 @@ Nick Roblox: ${nick}`
                 const embedData = new EmbedBuilder()
                     .setColor("Orange")
                     .setDescription(
-`# 📄 Nowy dowód osobisty  
+`# <:koperta:1479760548500471830> Nowy dowód osobisty  
 Użytkownik: ${interaction.user}
 
 Imię: ${imie}
