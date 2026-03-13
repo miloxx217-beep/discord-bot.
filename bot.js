@@ -55,30 +55,32 @@ const PJ_CE_ROLE_ID = "1479920394831003892";
 const workCooldown = new Map();
 
 // ============================
-// DOWODY
+// DOWODY – LOSOWE NUMERY
 // ============================
-let dowodCounter = 0;
 
-if (fs.existsSync("dowody_counter.txt")) {
-    const val = fs.readFileSync("dowody_counter.txt", "utf8").trim();
-    if (val) dowodCounter = parseInt(val, 10) || 0;
-}
+// Zbiór numerów, które już zostały użyte
+let usedIDs = new Set();
 
-function saveDowodCounter() {
-    fs.writeFileSync("dowody_counter.txt", String(dowodCounter));
-}
-
-let usersWithID = new Set();
-
+// Wczytywanie istniejących numerów z pliku
 if (fs.existsSync("dowody.txt")) {
     const lines = fs.readFileSync("dowody.txt", "utf8").split("\n");
     for (const line of lines) {
-        if (line.trim().length > 0) usersWithID.add(line.trim());
+        if (line.trim().length > 0) usedIDs.add(line.trim());
     }
 }
 
-function saveUserID(userId) {
-    fs.appendFileSync("dowody.txt", userId + "\n");
+// Funkcja generująca unikalny numer dowodu
+function generateDowodNumber() {
+    let number;
+    do {
+        number = Math.floor(100000 + Math.random() * 900000).toString(); 
+        // generuje numer 6‑cyfrowy, np. 482193
+    } while (usedIDs.has(number));
+
+    usedIDs.add(number);
+    fs.appendFileSync("dowody.txt", number + "\n");
+
+    return number;
 }
 
 // ============================
