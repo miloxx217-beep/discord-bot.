@@ -849,31 +849,32 @@ Nick Roblox: ${nick}`
             });
         }
 
-        // DOWÓD
-        if (interaction.customId === "dowod_modal") {
-            if (usersWithID.has(interaction.user.id)) {
-                return interaction.reply({
-                    content: "❌ Masz już wyrobiony dowód osobisty.",
-                    ephemeral: true
-                });
-            }
+     // DOWÓD
+if (interaction.customId === "dowod_modal") {
+    if (usersWithID.has(interaction.user.id)) {
+        return interaction.reply({
+            content: "❌ Masz już wyrobiony dowód osobisty.",
+            ephemeral: true
+        });
+    }
 
-            const imie = interaction.fields.getTextInputValue("dowod_imie");
-            const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
-            const plec = interaction.fields.getTextInputValue("dowod_plec");
-            const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
+    const imie = interaction.fields.getTextInputValue("dowod_imie");
+    const nazwisko = interaction.fields.getTextInputValue("dowod_nazwisko");
+    const plec = interaction.fields.getTextInputValue("dowod_plec");
+    const obywatelstwo = interaction.fields.getTextInputValue("dowod_obywatelstwo");
 
-            const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
+    const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
 
-            dowodCounter++;
-            saveDowodCounter();
-            usersWithID.add(interaction.user.id);
-            saveUserID(interaction.user.id);
+    // GENEROWANIE LOSOWEGO NUMERU DOWODU
+    const numerDowodu = generateDowodNumber();
 
-            if (dowodyChannel) {
-                const embedData = new EmbedBuilder()
-                    .setColor("Orange")
-                    .setDescription(
+    usersWithID.add(interaction.user.id);
+    saveUserID(interaction.user.id);
+
+    if (dowodyChannel) {
+        const embedData = new EmbedBuilder()
+            .setColor("Orange")
+            .setDescription(
 `# <:koperta:1479760548500471830> Nowy dowód osobisty  
 Użytkownik: ${interaction.user}
 
@@ -882,16 +883,16 @@ Nazwisko: ${nazwisko}
 Płeć: ${plec}
 Obywatelstwo: ${obywatelstwo}
 
-Numer dowodu: ${dowodCounter}`);
+Numer dowodu: **${numerDowodu}**`);
 
-                await dowodyChannel.send({ embeds: [embedData] });
-            }
+        await dowodyChannel.send({ embeds: [embedData] });
+    }
 
-            return interaction.reply({
-                content: "Twój wniosek o dowód został wysłany!",
-                ephemeral: true
-            });
-        }
+    return interaction.reply({
+        content: "Twój wniosek o dowód został wysłany!",
+        ephemeral: true
+    });
+}
 
         // BANK — TWORZENIE KONTA
         if (interaction.customId === "bank_create_modal") {
