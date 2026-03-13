@@ -849,8 +849,10 @@ Nick Roblox: ${nick}`
             });
         }
 
-     // DOWÓD
+// DOWÓD
 if (interaction.customId === "dowod_modal") {
+
+    // jeśli użytkownik ma już dowód → blokada
     if (usersWithID.has(interaction.user.id)) {
         return interaction.reply({
             content: "❌ Masz już wyrobiony dowód osobisty.",
@@ -865,9 +867,10 @@ if (interaction.customId === "dowod_modal") {
 
     const dowodyChannel = interaction.guild.channels.cache.get(DOWODY_CHANNEL_ID);
 
-    // GENEROWANIE LOSOWEGO NUMERU DOWODU
+    // GENEROWANIE LOSOWEGO NUMERU
     const numerDowodu = generateDowodNumber();
 
+    // zapis użytkownika
     usersWithID.add(interaction.user.id);
     saveUserID(interaction.user.id);
 
@@ -887,6 +890,13 @@ Numer dowodu: **${numerDowodu}**`);
 
         await dowodyChannel.send({ embeds: [embedData] });
     }
+
+    return interaction.reply({
+        content: "Twój wniosek o dowód został wysłany!",
+        ephemeral: true
+    });
+}
+
 
     return interaction.reply({
         content: "Twój wniosek o dowód został wysłany!",
