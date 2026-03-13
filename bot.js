@@ -413,7 +413,7 @@ client.on("interactionCreate", async (interaction) => {
 if (interaction.customId === "dowod_start") {
 
     // BLOKADA — jeśli ktoś ma już rolę dowodu osobistego
-    if (interaction.member.roles.cache.has("ID_ROLI_DOWODU")) {
+    if (interaction.member.roles.cache.has("1480272874244804808")) {
         return interaction.reply({
             content: "❌ Posiadasz już dowód osobisty — nie możesz złożyć wniosku ponownie.",
             ephemeral: true
