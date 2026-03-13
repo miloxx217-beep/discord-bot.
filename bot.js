@@ -409,45 +409,54 @@ client.on("interactionCreate", async (interaction) => {
             });
         }
 
-        // DOWÓD
-        if (interaction.customId === "dowod_start") {
-            const modal = new ModalBuilder()
-                .setCustomId("dowod_modal")
-                .setTitle("Wniosek o dowód osobisty");
+       // DOWÓD
+if (interaction.customId === "dowod_start") {
 
-            const imie = new TextInputBuilder()
-                .setCustomId("dowod_imie")
-                .setLabel("Imię")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    // BLOKADA — jeśli ktoś ma już rolę dowodu osobistego
+    if (interaction.member.roles.cache.has("ID_ROLI_DOWODU")) {
+        return interaction.reply({
+            content: "❌ Posiadasz już dowód osobisty — nie możesz złożyć wniosku ponownie.",
+            ephemeral: true
+        });
+    }
 
-            const nazwisko = new TextInputBuilder()
-                .setCustomId("dowod_nazwisko")
-                .setLabel("Nazwisko")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    const modal = new ModalBuilder()
+        .setCustomId("dowod_modal")
+        .setTitle("Wniosek o dowód osobisty");
 
-            const plec = new TextInputBuilder()
-                .setCustomId("dowod_plec")
-                .setLabel("Płeć")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    const imie = new TextInputBuilder()
+        .setCustomId("dowod_imie")
+        .setLabel("Imię")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-            const obywatelstwo = new TextInputBuilder()
-                .setCustomId("dowod_obywatelstwo")
-                .setLabel("Obywatelstwo")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    const nazwisko = new TextInputBuilder()
+        .setCustomId("dowod_nazwisko")
+        .setLabel("Nazwisko")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(imie),
-                new ActionRowBuilder().addComponents(nazwisko),
-                new ActionRowBuilder().addComponents(plec),
-                new ActionRowBuilder().addComponents(obywatelstwo)
-            );
+    const plec = new TextInputBuilder()
+        .setCustomId("dowod_plec")
+        .setLabel("Płeć")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-            return interaction.showModal(modal);
-        }
+    const obywatelstwo = new TextInputBuilder()
+        .setCustomId("dowod_obywatelstwo")
+        .setLabel("Obywatelstwo")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(imie),
+        new ActionRowBuilder().addComponents(nazwisko),
+        new ActionRowBuilder().addComponents(plec),
+        new ActionRowBuilder().addComponents(obywatelstwo)
+    );
+
+    return interaction.showModal(modal);
+}
 
         // PRAWO JAZDY
         if (interaction.customId === "pj_start") {
