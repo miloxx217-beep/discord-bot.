@@ -1082,7 +1082,6 @@ Numer dowodu: **${numerDowodu}**`);
                 ephemeral: true
             });
         }
-    }
 
     // SELECT MENU
     if (interaction.isStringSelectMenu()) {
