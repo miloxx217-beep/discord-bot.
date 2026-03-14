@@ -116,28 +116,15 @@ const shared = {
 // ============================
 // ŁADOWANIE MODUŁÓW
 // ============================
-require("./modules/verify_reg_urzad")(client, shared);
-require("./modules/dowody")(client, shared);
-require("./modules/bank_kantor_sklep")(client, shared);
-require("./modules/select_menus")(client, shared);
-require("./modules/slash_commands")(client, shared);
-require("./modules/autovoice")(client, shared);
+require("./verify_reg_urzad.js")(client, shared);
+require("./dowody.js")(client, shared);
+require("./bank_kantor_sklep.js")(client, shared);
+require("./autovoice.js")(client, shared);
 
-require("./modules/ranking.js")(client);
+require("./ranking.js")(client);
 require("./mandaty.js")(client);
 
 // ============================
 // START
 // ============================
-require("./dowody.js")(client);
-require("./bank.js")(client);
-require("./kantor.js")(client);
-require("./sklep.js")(client);
-require("./urzad.js")(client);
-require("./regulamin.js")(client);
-require("./autovoice.js")(client);
-
-require("./ranking.js")(client);
-require("./mandaty.js")(client);
-
 client.login(process.env.TOKEN);
