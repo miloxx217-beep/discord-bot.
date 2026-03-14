@@ -1,3 +1,7 @@
+// ============================
+// BANK + KANTOR + SKLEP
+// ============================
+
 const {
     EmbedBuilder,
     ActionRowBuilder,
@@ -11,6 +15,7 @@ const {
 } = require("discord.js");
 
 module.exports = (client, shared) => {
+
     const {
         config,
         loadBankData,
@@ -20,62 +25,83 @@ module.exports = (client, shared) => {
         loggedInUsers
     } = shared;
 
-    // READY – panele bank/kantor/sklep
+    // ============================
+    // READY — wysyłanie paneli
+    // ============================
     client.once("ready", async () => {
         const guild = client.guilds.cache.get(config.GUILD_ID);
         if (!guild) return;
 
-        // BANK
+        // BANK PANEL
         const bankChannel = guild.channels.cache.get(config.BANK_CHANNEL_ID);
         if (bankChannel) {
-            const embedBank = new EmbedBuilder()
+            const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setDescription("# <:mlot:1479760749541855362> Bank");
-            const rowBank = new ActionRowBuilder().addComponents(
+                .setDescription(
+`# <:mlot:1479760749541855362> Bank
+
+Zaloguj się, aby sprawdzić saldo lub wykonać przelew.`);
+
+            const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("bank_login")
                     .setLabel("Zaloguj się")
                     .setStyle(ButtonStyle.Secondary)
             );
-            await bankChannel.send({ embeds: [embedBank], components: [rowBank] });
+
+            await bankChannel.send({ embeds: [embed], components: [row] });
         }
 
-        // KANTOR
+        // KANTOR PANEL
         const kantorChannel = guild.channels.cache.get(config.KANTOR_CHANNEL_ID);
         if (kantorChannel) {
-            const embedKantor = new EmbedBuilder()
+            const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setDescription("# Kantor Wymiany Walut");
-            const rowKantor = new ActionRowBuilder().addComponents(
+                .setDescription(
+`# <:rakieta:1479760849835917342> Kantor Wymiany Walut
+
+Kliknij, aby otworzyć ticket wymiany.`);
+
+            const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("kantor_wymiana")
                     .setLabel("Wymień walutę")
                     .setStyle(ButtonStyle.Secondary)
             );
-            await kantorChannel.send({ embeds: [embedKantor], components: [rowKantor] });
+
+            await kantorChannel.send({ embeds: [embed], components: [row] });
         }
 
-        // SKLEP
+        // SKLEP PANEL
         const sklepChannel = guild.channels.cache.get(config.SKLEP_CHANNEL_ID);
         if (sklepChannel) {
-            const embedSklep = new EmbedBuilder()
+            const embed = new EmbedBuilder()
                 .setColor("Orange")
-                .setDescription("# Sklep");
-            const rowSklep = new ActionRowBuilder().addComponents(
+                .setDescription(
+`# <:sklep:1479916476210352239> Sklep
+
+Kup rangi i prawa jazdy.`);
+
+            const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("sklep_open")
                     .setLabel("Otwórz sklep")
                     .setStyle(ButtonStyle.Secondary)
             );
-            await sklepChannel.send({ embeds: [embedSklep], components: [rowSklep] });
+
+            await sklepChannel.send({ embeds: [embed], components: [row] });
         }
     });
 
-    // PRZYCISKI – bank/kantor/sklep
+    // ============================
+    // PRZYCISKI
+    // ============================
     client.on("interactionCreate", async (interaction) => {
         if (!interaction.isButton()) return;
 
+        // ----------------------------
         // BANK LOGIN
+        // ----------------------------
         if (interaction.customId === "bank_login") {
             const account = getUserAccount(interaction.user.id);
 
@@ -92,27 +118,29 @@ module.exports = (client, shared) => {
 
                 modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
                 return interaction.showModal(modal);
-            } else {
-                const modal = new ModalBuilder()
-                    .setCustomId("bank_login_modal")
-                    .setTitle("Logowanie do banku");
-
-                const pinInput = new TextInputBuilder()
-                    .setCustomId("bank_pin_login")
-                    .setLabel("Podaj swój 4-cyfrowy PIN")
-                    .setStyle(TextInputStyle.Short)
-                    .setRequired(true);
-
-                modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
-                return interaction.showModal(modal);
             }
+
+            const modal = new ModalBuilder()
+                .setCustomId("bank_login_modal")
+                .setTitle("Logowanie do banku");
+
+            const pinInput = new TextInputBuilder()
+                .setCustomId("bank_pin_login")
+                .setLabel("Podaj swój PIN")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(new ActionRowBuilder().addComponents(pinInput));
+            return interaction.showModal(modal);
         }
 
+        // ----------------------------
         // BANK MENU
+        // ----------------------------
         if (interaction.customId === "bank_menu") {
             if (!loggedInUsers.has(interaction.user.id)) {
                 return interaction.reply({
-                    content: "❌ Nie jesteś zalogowany do banku.",
+                    content: "❌ Nie jesteś zalogowany.",
                     ephemeral: true
                 });
             }
@@ -120,11 +148,11 @@ module.exports = (client, shared) => {
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("bank_saldo")
-                    .setLabel("Sprawdź saldo")
+                    .setLabel("Saldo")
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId("bank_przelew")
-                    .setLabel("Przelej pieniądze")
+                    .setLabel("Przelew")
                     .setStyle(ButtonStyle.Secondary)
             );
 
@@ -135,15 +163,397 @@ module.exports = (client, shared) => {
             });
         }
 
-        // KANTOR – otwarcie ticketu, realizacja, zamknięcie
-        // SKLEP – otwarcie
-        // (tu możesz wkleić 1:1 swoje istniejące fragmenty z obecnego bota)
+        // ----------------------------
+        // BANK SALDO
+        // ----------------------------
+        if (interaction.customId === "bank_saldo") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(interaction.user.id);
+
+            return interaction.reply({
+                content: `💰 Twoje saldo: **${account.balance} $**`,
+                ephemeral: true
+            });
+        }
+
+        // ----------------------------
+        // BANK PRZELEW — MODAL
+        // ----------------------------
+        if (interaction.customId === "bank_przelew") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("bank_transfer_modal")
+                .setTitle("Przelew bankowy");
+
+            const target = new TextInputBuilder()
+                .setCustomId("bank_transfer_target")
+                .setLabel("Podaj @użytkownika lub ID")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const amount = new TextInputBuilder()
+                .setCustomId("bank_transfer_amount")
+                .setLabel("Kwota")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(target),
+                new ActionRowBuilder().addComponents(amount)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // ----------------------------
+        // KANTOR — OTWARCIE TICKETA
+        // ----------------------------
+        if (interaction.customId === "kantor_wymiana") {
+
+            const ticket = await interaction.guild.channels.create({
+                name: `kantor-${interaction.user.username}`,
+                type: 0,
+                parent: config.KANTOR_TICKET_CATEGORY_ID,
+                permissionOverwrites: [
+                    { id: interaction.guild.id, deny: ["ViewChannel"] },
+                    { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"] },
+                    { id: interaction.guild.ownerId, allow: ["ViewChannel", "SendMessages", "ManageChannels"] }
+                ]
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor("Orange")
+                .setDescription(
+`# Kantor — wymiana waluty
+
+Wstaw screena potwierdzającego wysłanie waluty.`);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("kantor_realizuj")
+                    .setLabel("Zrealizuj")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("kantor_zamknij")
+                    .setLabel("Zamknij")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            await ticket.send({ content: `${interaction.user}`, embeds: [embed], components: [row] });
+
+            return interaction.reply({
+                content: "Ticket kantoru został utworzony!",
+                ephemeral: true
+            });
+        }
+
+        // ----------------------------
+        // KANTOR — ZAMKNIĘCIE
+        // ----------------------------
+        if (interaction.customId === "kantor_zamknij") {
+            if (!interaction.member.roles.cache.has(config.WLASCICIEL_ROLE_ID)) {
+                return interaction.reply({
+                    content: "❌ Brak uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            return interaction.channel.delete();
+        }
+
+        // ----------------------------
+        // SKLEP — OTWARCIE
+        // ----------------------------
+        if (interaction.customId === "sklep_open") {
+            const menu = new StringSelectMenuBuilder()
+                .setCustomId("sklep_select")
+                .setPlaceholder("Wybierz produkt")
+                .addOptions(
+                    { label: "Ranga Premium (8000$)", value: "premium_8000" },
+                    { label: "Prawo jazdy B (3500$)", value: "pj_B_3500" },
+                    { label: "Prawo jazdy A (3000$)", value: "pj_A_3000" },
+                    { label: "Prawo jazdy T (2000$)", value: "pj_T_2000" },
+                    { label: "Prawo jazdy C (4000$)", value: "pj_C_4000" },
+                    { label: "Prawo jazdy D (4500$)", value: "pj_D_4500" },
+                    { label: "Prawo jazdy C+E (5000$)", value: "pj_CE_5000" }
+                );
+
+            return interaction.reply({
+                content: "Wybierz przedmiot:",
+                components: [new ActionRowBuilder().addComponents(menu)],
+                ephemeral: true
+            });
+        }
     });
 
-    // MODALE – bank_create, bank_login, bank_transfer, kantor_modal
+    // ============================
+    // MODALE
+    // ============================
     client.on("interactionCreate", async (interaction) => {
         if (interaction.type !== InteractionType.ModalSubmit) return;
 
-        // tu wklejasz swoje istniejące obsługi modali banku i kantoru
+        // ----------------------------
+        // BANK — TWORZENIE KONTA
+        // ----------------------------
+        if (interaction.customId === "bank_create_modal") {
+            const pin = interaction.fields.getTextInputValue("bank_pin").trim();
+
+            if (!/^\d{4}$/.test(pin)) {
+                return interaction.reply({
+                    content: "❌ PIN musi mieć 4 cyfry.",
+                    ephemeral: true
+                });
+            }
+
+            const existing = getUserAccount(interaction.user.id);
+            if (existing) {
+                return interaction.reply({
+                    content: "❌ Masz już konto.",
+                    ephemeral: true
+                });
+            }
+
+            setUserAccount(interaction.user.id, pin, 0);
+            loggedInUsers.add(interaction.user.id);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_menu")
+                    .setLabel("Menu banku")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "✔ Konto utworzone!",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // ----------------------------
+        // BANK — LOGOWANIE
+        // ----------------------------
+        if (interaction.customId === "bank_login_modal") {
+            const pin = interaction.fields.getTextInputValue("bank_pin_login").trim();
+            const account = getUserAccount(interaction.user.id);
+
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Nie masz konta.",
+                    ephemeral: true
+                });
+            }
+
+            if (account.pin !== pin) {
+                return interaction.reply({
+                    content: "❌ Zły PIN.",
+                    ephemeral: true
+                });
+            }
+
+            loggedInUsers.add(interaction.user.id);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("bank_menu")
+                    .setLabel("Menu banku")
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            return interaction.reply({
+                content: "✔ Zalogowano!",
+                components: [row],
+                ephemeral: true
+            });
+        }
+
+        // ----------------------------
+        // BANK — PRZELEW
+        // ----------------------------
+        if (interaction.customId === "bank_transfer_modal") {
+            if (!loggedInUsers.has(interaction.user.id)) {
+                return interaction.reply({
+                    content: "❌ Nie jesteś zalogowany.",
+                    ephemeral: true
+                });
+            }
+
+            const targetRaw = interaction.fields.getTextInputValue("bank_transfer_target").trim();
+            const amountRaw = interaction.fields.getTextInputValue("bank_transfer_amount").trim();
+
+            const amount = Number(amountRaw);
+            if (isNaN(amount) || amount <= 0) {
+                return interaction.reply({
+                    content: "❌ Kwota musi być dodatnia.",
+                    ephemeral: true
+                });
+            }
+
+            let targetId = targetRaw;
+            const match = targetRaw.match(/^<@!?(\d+)>$/);
+            if (match) targetId = match[1];
+
+            if (targetId === interaction.user.id) {
+                return interaction.reply({
+                    content: "❌ Nie możesz przelać samemu sobie.",
+                    ephemeral: true
+                });
+            }
+
+            const senderAcc = getUserAccount(interaction.user.id);
+            if (!senderAcc || senderAcc.balance < amount) {
+                return interaction.reply({
+                    content: "❌ Brak środków.",
+                    ephemeral: true
+                });
+            }
+
+            const targetAcc = getUserAccount(targetId);
+            if (!targetAcc) {
+                return interaction.reply({
+                    content: "❌ Odbiorca nie ma konta.",
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[interaction.user.id].balance -= amount;
+            data[targetId].balance += amount;
+            saveBankData(data);
+
+            return interaction.reply({
+                content: `✔ Przelano ${amount}$ do <@${targetId}>.`,
+                ephemeral: true
+            });
+        }
+
+        // ----------------------------
+        // KANTOR — REALIZACJA
+        // ----------------------------
+        if (interaction.customId === "kantor_modal") {
+            if (!interaction.member.roles.cache.has(config.WLASCICIEL_ROLE_ID)) {
+                return interaction.reply({
+                    content: "❌ Brak uprawnień.",
+                    ephemeral: true
+                });
+            }
+
+            const userId = interaction.fields.getTextInputValue("kantor_id");
+            const kwotaRaw = interaction.fields.getTextInputValue("kantor_kwota");
+            const kwota = Number(kwotaRaw);
+
+            if (isNaN(kwota) || kwota <= 0) {
+                return interaction.reply({
+                    content: "❌ Kwota musi być dodatnia.",
+                    ephemeral: true
+                });
+            }
+
+            const account = getUserAccount(userId);
+            if (!account) {
+                return interaction.reply({
+                    content: "❌ Ten użytkownik nie ma konta.",
+                    ephemeral: true
+                });
+            }
+
+            const data = loadBankData();
+            data[userId].balance += kwota;
+            saveBankData(data);
+
+            await interaction.channel.send(
+                `Realizacja kantoru — <@${userId}> otrzymał ${kwota}$.`
+            );
+
+            return interaction.reply({
+                content: "✔ Zrealizowano kantor.",
+                ephemeral: true
+            });
+        }
+    });
+
+    // ============================
+    // SELECT MENU — SKLEP
+    // ============================
+    client.on("interactionCreate", async (interaction) => {
+        if (!interaction.isStringSelectMenu()) return;
+        if (interaction.customId !== "sklep_select") return;
+
+        const choice = interaction.values[0];
+        const account = getUserAccount(interaction.user.id);
+
+        if (!account) {
+            return interaction.reply({
+                content: "❌ Nie masz konta bankowego.",
+                ephemeral: true
+            });
+        }
+
+        const prices = {
+            "premium_8000": 8000,
+            "pj_B_3500": 3500,
+            "pj_A_3000": 3000,
+            "pj_T_2000": 2000,
+            "pj_C_4000": 4000,
+            "pj_D_4500": 4500,
+            "pj_CE_5000": 5000
+        };
+
+        const names = {
+            "premium_8000": "Ranga Premium",
+            "pj_B_3500": "Prawo jazdy B",
+            "pj_A_3000": "Prawo jazdy A",
+            "pj_T_2000": "Prawo jazdy T",
+            "pj_C_4000": "Prawo jazdy C",
+            "pj_D_4500": "Prawo jazdy D",
+            "pj_CE_5000": "Prawo jazdy C+E"
+        };
+
+        const roles = {
+            "premium_8000": config.PREMIUM_ROLE_ID,
+            "pj_B_3500": config.PJ_B_ROLE_ID,
+            "pj_A_3000": config.PJ_A_ROLE_ID,
+            "pj_T_2000": config.PJ_T_ROLE_ID,
+            "pj_C_4000": config.PJ_C_ROLE_ID,
+            "pj_D_4500": config.PJ_D_ROLE_ID,
+            "pj_CE_5000": config.PJ_CE_ROLE_ID
+        };
+
+        const price = prices[choice];
+        const name = names[choice];
+        const roleId = roles[choice];
+
+        if (account.balance < price) {
+            return interaction.reply({
+                content: `❌ Brakuje Ci środków. Potrzebujesz ${price}$.`,
+                ephemeral: true
+            });
+        }
+
+        const data = loadBankData();
+        data[interaction.user.id].balance -= price;
+        saveBankData(data);
+
+        const role = interaction.guild.roles.cache.get(roleId);
+        if (role) {
+            await interaction.member.roles.add(role);
+        }
+
+        return interaction.reply({
+            content: `✔ Zakupiono: **${name}** za **${price}$**.`,
+            ephemeral: true
+        });
     });
 };
