@@ -129,4 +129,15 @@ require("./mandaty.js")(client);
 // ============================
 // START
 // ============================
+require("./dowody.js")(client);
+require("./bank.js")(client);
+require("./kantor.js")(client);
+require("./sklep.js")(client);
+require("./urzad.js")(client);
+require("./regulamin.js")(client);
+require("./autovoice.js")(client);
+
+require("./ranking.js")(client);
+require("./mandaty.js")(client);
+
 client.login(process.env.TOKEN);
