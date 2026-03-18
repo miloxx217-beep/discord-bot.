@@ -5,8 +5,7 @@ module.exports = (client, shared) => {
         if (!interaction.isChatInputCommand()) return;
         if (interaction.commandName !== "resetdowod") return;
 
-        const ownerId = "TWÓJ_ID"; // ← WSTAW SWOJE ID
-
+        const ownerId = "1478750576408793239"; 
         if (interaction.user.id !== ownerId) {
             return interaction.reply({
                 content: "❌ Nie masz uprawnień do tej komendy.",
