@@ -7,7 +7,7 @@ module.exports = (client, shared) => {
         // komenda: !resetdowod @user
         if (!message.content.startsWith("!resetdowod")) return;
 
-        const ownerId = "1478750576408793239"; // twoje ID
+        const ownerId = "1247219219553325079"; // twoje ID
         if (message.author.id !== ownerId) {
             return message.reply("❌ Nie masz uprawnień do tej komendy.");
         }
