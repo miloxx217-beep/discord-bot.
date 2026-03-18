@@ -1,7 +1,7 @@
 const { REST, Routes, SlashCommandBuilder } = require("discord.js");
 require("dotenv").config();
 
-module.exports = async () => {
+async function registerCommands() {
 
     const commands = [
 
@@ -28,8 +28,7 @@ module.exports = async () => {
                 option.setName("uzytkownik")
                     .setDescription("Użytkownik, któremu chcesz zresetować dowód")
                     .setRequired(true))
-    ]
-        .map(cmd => cmd.toJSON());
+    ].map(cmd => cmd.toJSON());
 
     const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
@@ -43,4 +42,6 @@ module.exports = async () => {
     } catch (err) {
         console.error(err);
     }
-};
+}
+
+module.exports = registerCommands;
