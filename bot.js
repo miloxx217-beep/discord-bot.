@@ -124,9 +124,7 @@ require("./autovoice.js")(client, shared);
 require("./ranking.js")(client);
 require("./mandaty.js")(client);
 require("./resetdowod.js")(client, shared);
-
-const registerCommands = require("./register-commands.js");
-registerCommands();
+require("./resetdowod.js")(client, shared);
 
 // ============================
 // START
