@@ -1,19 +1,21 @@
 module.exports = (client, shared) => {
     const fs = shared.fs;
 
-    client.on("interactionCreate", async interaction => {
-        if (!interaction.isChatInputCommand()) return;
-        if (interaction.commandName !== "resetdowod") return;
+    client.on("messageCreate", async (message) => {
+        if (message.author.bot) return;
 
-        const ownerId = "1478750576408793239"; 
-        if (interaction.user.id !== ownerId) {
-            return interaction.reply({
-                content: "❌ Nie masz uprawnień do tej komendy.",
-                ephemeral: true
-            });
+        // komenda: !resetdowod @user
+        if (!message.content.startsWith("!resetdowod")) return;
+
+        const ownerId = "1478750576408793239"; // twoje ID
+        if (message.author.id !== ownerId) {
+            return message.reply("❌ Nie masz uprawnień do tej komendy.");
         }
 
-        const user = interaction.options.getUser("uzytkownik");
+        const user = message.mentions.users.first();
+        if (!user) {
+            return message.reply("❗ Użycie: `!resetdowod @użytkownik`");
+        }
 
         // usuń użytkownika z listy
         shared.usersWithID.delete(user.id);
@@ -21,6 +23,6 @@ module.exports = (client, shared) => {
         // zapisz do pliku
         fs.writeFileSync("dowody_users.txt", [...shared.usersWithID].join("\n"));
 
-        return interaction.reply(`🔄 Zresetowano dowód użytkownika **${user.username}**.`);
+        message.reply(`🔄 Zresetowano dowód użytkownika **${user.username}**.`);
     });
 };
