@@ -17,6 +17,14 @@ const commands = [
         .addIntegerOption(option =>
             option.setName("kwota")
                 .setDescription("Kwota do dodania")
+                .setRequired(true)),
+
+    new SlashCommandBuilder()
+        .setName("resetdowod")
+        .setDescription("Resetuje możliwość wyrabiania dowodu użytkownikowi (tylko właściciel).")
+        .addUserOption(option =>
+            option.setName("uzytkownik")
+                .setDescription("Użytkownik, któremu chcesz zresetować dowód")
                 .setRequired(true))
 ]
     .map(cmd => cmd.toJSON());
