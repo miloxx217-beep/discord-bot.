@@ -125,6 +125,9 @@ require("./ranking.js")(client);
 require("./mandaty.js")(client);
 require("./resetdowod.js")(client, shared);
 
+const registerCommands = require("./register-commands.js");
+registerCommands();
+
 // ============================
 // START
 // ============================
