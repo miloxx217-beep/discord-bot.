@@ -498,6 +498,35 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
                 ephemeral: true
             });
         }
+        
+// ----------------------------
+// KANTOR — PRZYCISK ZREALIZUJ
+// ----------------------------
+if (interaction.customId === "kantor_realizuj") {
+
+    const modal = new ModalBuilder()
+        .setCustomId("kantor_modal")
+        .setTitle("Realizacja kantoru");
+
+    const idInput = new TextInputBuilder()
+        .setCustomId("kantor_id")
+        .setLabel("ID użytkownika")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const kwotaInput = new TextInputBuilder()
+        .setCustomId("kantor_kwota")
+        .setLabel("Kwota do dodania")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(idInput),
+        new ActionRowBuilder().addComponents(kwotaInput)
+    );
+
+    return interaction.showModal(modal);
+}
 
         // ----------------------------
         // KANTOR — REALIZACJA
@@ -544,35 +573,6 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
         }
     });
     
-// ----------------------------
-// KANTOR — PRZYCISK ZREALIZUJ
-// ----------------------------
-if (interaction.customId === "kantor_realizuj") {
-
-    const modal = new ModalBuilder()
-        .setCustomId("kantor_modal")
-        .setTitle("Realizacja kantoru");
-
-    const idInput = new TextInputBuilder()
-        .setCustomId("kantor_id")
-        .setLabel("ID użytkownika")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    const kwotaInput = new TextInputBuilder()
-        .setCustomId("kantor_kwota")
-        .setLabel("Kwota do dodania")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    modal.addComponents(
-        new ActionRowBuilder().addComponents(idInput),
-        new ActionRowBuilder().addComponents(kwotaInput)
-    );
-
-    return interaction.showModal(modal);
-}
-
     // ============================
     // SELECT MENU — SKLEP
     // ============================
