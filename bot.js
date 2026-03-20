@@ -129,12 +129,16 @@ require("./register-commands.js");
 // ============================
 // OBSŁUGA KOMEND SLASH
 // ============================
+
 client.on("interactionCreate", async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
-    const ownerRoleId = "1478754923142316276"; 
+    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← WSTAW ID ROLI
+    const workChannelId = "ID_KANAŁU_PRACUJ";  // ← WSTAW ID KANAŁU #pracuj
 
+    // ============================
     // /pracuj
+    // ============================
     if (interaction.commandName === "pracuj") {
 
         const userId = interaction.user.id;
@@ -155,10 +159,37 @@ client.on("interactionCreate", async interaction => {
         acc.balance += amount;
         shared.setUserAccount(userId, acc.pin, acc.balance);
 
-        return interaction.reply(`💼 Pracowałeś i zarobiłeś **${amount} monet**!`);
+        // jeśli komenda NIE została użyta na kanale #pracuj
+        if (interaction.channel.id !== workChannelId) {
+
+            const workChannel = client.channels.cache.get(workChannelId);
+            if (workChannel) {
+                workChannel.send(
+                    `**Praca wykonana**\n` +
+                    `<@${userId}> wykonał pracę.\n` +
+                    `Otrzymał: **${amount} $**\n` +
+                    `Nowe saldo: **${acc.balance} $**`
+                );
+            }
+
+            return interaction.reply({
+                content: `💼 Praca wykonana! Sprawdź szczegóły na kanale <#${workChannelId}>.`,
+                ephemeral: true
+            });
+        }
+
+        // jeśli komenda została użyta na kanale #pracuj
+        return interaction.reply(
+            `**Praca wykonana**\n` +
+            `<@${userId}> wykonał pracę.\n` +
+            `Otrzymał: **${amount} $**\n` +
+            `Nowe saldo: **${acc.balance} $**`
+        );
     }
 
+    // ============================
     // /dodajkase
+    // ============================
     if (interaction.commandName === "dodajkase") {
 
         if (!interaction.member.roles.cache.has(ownerRoleId)) {
