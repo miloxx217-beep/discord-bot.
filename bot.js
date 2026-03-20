@@ -192,72 +192,6 @@ client.on("interactionCreate", async interaction => {
         return interaction.reply({ embeds: [embed] });
     }
 
-// ============================
-// OBSŁUGA KOMEND SLASH
-// ============================
-
-client.on("interactionCreate", async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
-    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← WSTAW ID ROLI
-    const workChannelId = "ID_KANAŁU_PRACUJ";  // ← WSTAW ID KANAŁU #pracuj
-
-    // ============================
-    // /pracuj
-    // ============================
-    if (interaction.commandName === "pracuj") {
-
-        const userId = interaction.user.id;
-        const now = Date.now();
-
-        const last = shared.workCooldown.get(userId) || 0;
-
-        if (now - last < 3600000) {
-            const remaining = Math.ceil((3600000 - (now - last)) / 60000);
-            return interaction.reply(`⏳ Możesz pracować ponownie za **${remaining} minut**.`);
-        }
-
-        shared.workCooldown.set(userId, now);
-
-        const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
-
-        const acc = shared.getUserAccount(userId) || { pin: "0000", balance: 0 };
-        acc.balance += amount;
-        shared.setUserAccount(userId, acc.pin, acc.balance);
-
-        // Tworzymy embed
-        const embed = {
-            title: "Praca wykonana",
-            description:
-                `<@${userId}> wykonał pracę.\n` +
-                `Otrzymał: **${amount} $**\n` +
-                `Nowe saldo: **${acc.balance} $**`,
-            color: 0x00ff99,
-            thumbnail: {
-                url: interaction.user.displayAvatarURL({ dynamic: true })
-            },
-            timestamp: new Date()
-        };
-
-        const workChannel = client.channels.cache.get(workChannelId);
-
-        // Jeśli komenda NIE została użyta na kanale #pracuj
-        if (interaction.channel.id !== workChannelId) {
-
-            if (workChannel) {
-                workChannel.send({ embeds: [embed] });
-            }
-
-            return interaction.reply({
-                content: `💼 Praca wykonana! Sprawdź szczegóły na kanale <#${workChannelId}>.`,
-                ephemeral: true
-            });
-        }
-
-        // Jeśli komenda została użyta na kanale #pracuj
-        return interaction.reply({ embeds: [embed] });
-    }
-
     // ============================
     // /dodajkase
     // ============================
@@ -281,5 +215,4 @@ client.on("interactionCreate", async interaction => {
 // ============================
 // START
 // ============================
-client.login(process.env.TOKEN);  
-  }
+client.login(process.env.TOKEN);
