@@ -132,7 +132,7 @@ require("./register-commands.js");
 client.on("interactionCreate", async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
-    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← Wstaw ID roli właściciel
+    const ownerRoleId = "1478754923142316276"; 
 
     // /pracuj
     if (interaction.commandName === "pracuj") {
