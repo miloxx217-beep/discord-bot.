@@ -319,48 +319,60 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
             });
         }
 
-        // ----------------------------
-        // KANTOR — PRZYCISK ZREALIZUJ
-        // ----------------------------
-        if (interaction.customId === "kantor_realizuj") {
+// ----------------------------
+// KANTOR — PRZYCISK ZREALIZUJ
+// ----------------------------
+if (interaction.customId === "kantor_realizuj") {
 
-            const modal = new ModalBuilder()
-                .setCustomId("kantor_modal")
-                .setTitle("Realizacja kantoru");
+    // 🔒 SPRAWDZENIE UPRAWNIEŃ
+    if (!interaction.member.roles.cache.has(config.WLASCICIEL_ROLE_ID)) {
+        return interaction.reply({
+            content: "❌ Brak uprawnień.",
+            ephemeral: true
+        });
+    }
 
-            const idInput = new TextInputBuilder()
-                .setCustomId("kantor_id")
-                .setLabel("ID użytkownika")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    // Jeśli ma uprawnienia → otwieramy modal
+    const modal = new ModalBuilder()
+        .setCustomId("kantor_modal")
+        .setTitle("Realizacja kantoru");
 
-            const kwotaInput = new TextInputBuilder()
-                .setCustomId("kantor_kwota")
-                .setLabel("Kwota do dodania")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(true);
+    const idInput = new TextInputBuilder()
+        .setCustomId("kantor_id")
+        .setLabel("ID użytkownika")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(idInput),
-                new ActionRowBuilder().addComponents(kwotaInput)
-            );
+    const kwotaInput = new TextInputBuilder()
+        .setCustomId("kantor_kwota")
+        .setLabel("Kwota do dodania")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-            return interaction.showModal(modal);
-        }
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(idInput),
+        new ActionRowBuilder().addComponents(kwotaInput)
+    );
 
-        // ----------------------------
-        // KANTOR — ZAMKNIĘCIE
-        // ----------------------------
-        if (interaction.customId === "kantor_zamknij") {
-            if (!interaction.member.roles.cache.has(config.WLASCICIEL_ROLE_ID)) {
-                return interaction.reply({
-                    content: "❌ Brak uprawnień.",
-                    ephemeral: true
-                });
-            }
+    return interaction.showModal(modal);
+}
 
-            return interaction.channel.delete();
-        }
+// ----------------------------
+// KANTOR — ZAMKNIĘCIE
+// ----------------------------
+if (interaction.customId === "kantor_zamknij") {
+
+    // 🔒 SPRAWDZENIE UPRAWNIEŃ
+    if (!interaction.member.roles.cache.has(config.WLASCICIEL_ROLE_ID)) {
+        return interaction.reply({
+            content: "❌ Brak uprawnień.",
+            ephemeral: true
+        });
+    }
+
+    // Jeśli ma uprawnienia → zamykamy ticket
+    return interaction.channel.delete();
+}
 
         // ----------------------------
         // SKLEP — OTWARCIE
