@@ -41,24 +41,7 @@ module.exports = (client, shared) => {
 `# <:mlot:1479760749541855362> Bank
 
 Witamy w oficjalnym systemie bankowym serwera.
-Bank Centralny zapewnia bezpieczne przechowywanie środków oraz szybkie i wygodne operacje finansowe dla wszystkich mieszkańców miasta.
-
-# - Dostępne usługi:
-• Sprawdzenie salda – natychmiastowy podgląd aktualnego stanu Twojego konta.
-• Przelewy między graczami – szybkie i bezpieczne przesyłanie środków innym graczom.
-
-# - Logowanie i bezpieczeństwo
-Aby uzyskać dostęp do swojego konta, kliknij przycisk Zaloguj się poniżej.
-Jeśli korzystasz z banku po raz pierwszy, zostaniesz poproszony o utworzenie 4‑cyfrowego PIN-u, który będzie służył jako zabezpieczenie Twojego konta.
-
-PIN jest znany wyłącznie Tobie — nie udostępniaj go innym graczom ani członkom administracji.
-
-# - Informacje dodatkowe
-• Każdy gracz może posiadać tylko jedno konto bankowe.
-• Przelewy są realizowane natychmiastowo.
-
-Dziękujemy za korzystanie z usług Banku.
-Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
+... (twój opis banku) ...`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -78,25 +61,7 @@ Twoje bezpieczeństwo i wygoda są naszym priorytetem.`);
                 .setDescription(
 `# <:rakieta:1479760849835917342> Kantor Wymiany Walut
 
-Witamy w oficjalnym Kantorze, miejscu przeznaczonym do bezpiecznej i przejrzystej wymiany walut pomiędzy ekonomią gry a ekonomią serwera.
-
-# • Informacje o kursie wymiany
-Aktualny kurs walut został ustalony przez Bank i obowiązuje wszystkich graczy serwera:
-
-**• 8000€ w grze → 4000$ na serwerze**
-
-# • Jak działa wymiana?
-Proces wymiany waluty jest prosty i w pełni bezpieczny:
-
-Kliknij przycisk Wymień walutę, aby otworzyć indywidualny ticket obsługi.
-W ticketcie otrzymasz dalsze instrukcje dotyczące przebiegu transakcji.
-Po potwierdzeniu wymiany środki zostaną dodane do Twojego konta na serwerze.
-
-# • Zasady bezpieczeństwa
-• Wymiana walut odbywa się wyłącznie poprzez oficjalny system kantoru.
-• Nie wykonuj transakcji poza ticketem — chroni to Twoje środki przed utratą.
-
-Dziękujemy za korzystanie z usług Kantoru.`);
+... (twój opis kantoru) ...`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -116,18 +81,7 @@ Dziękujemy za korzystanie z usług Kantoru.`);
                 .setDescription(
 `# <:sklep:1479916476210352239> Sklep
 
-Witamy w oficjalnym sklepie serwera.
-To miejsce, w którym możesz nabyć różnego rodzaju uprawnienia, licencje oraz usługi dostępne dla graczy serwera.
-
-# • Jak działa sklep?
-Po kliknięciu przycisku Otwórz sklep wyświetli Ci się lista dostępnych produktów.
-Każdy zakup jest realizowany automatycznie — środki zostaną pobrane z Twojego konta bankowego, a zakup zostanie natychmiast zapisany w systemie.
-
-# • Zasady zakupów
-• Aby dokonać zakupu, musisz posiadać wystarczającą ilość środków na koncie bankowym.
-• Wszystkie transakcje są ostateczne — upewnij się, że wybierasz właściwy produkt.
-
-Dziękujemy za korzystanie ze Sklepu.`);
+... (twój opis sklepu) ...`);
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -320,6 +274,35 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
         }
 
         // ----------------------------
+        // KANTOR — PRZYCISK ZREALIZUJ
+        // ----------------------------
+        if (interaction.customId === "kantor_realizuj") {
+
+            const modal = new ModalBuilder()
+                .setCustomId("kantor_modal")
+                .setTitle("Realizacja kantoru");
+
+            const idInput = new TextInputBuilder()
+                .setCustomId("kantor_id")
+                .setLabel("ID użytkownika")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const kwotaInput = new TextInputBuilder()
+                .setCustomId("kantor_kwota")
+                .setLabel("Kwota do dodania")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(idInput),
+                new ActionRowBuilder().addComponents(kwotaInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        // ----------------------------
         // KANTOR — ZAMKNIĘCIE
         // ----------------------------
         if (interaction.customId === "kantor_zamknij") {
@@ -498,35 +481,6 @@ Po sprawdzeniu screena administracja przeliczy walutę według kursu i środki z
                 ephemeral: true
             });
         }
-        
-// ----------------------------
-// KANTOR — PRZYCISK ZREALIZUJ
-// ----------------------------
-if (interaction.customId === "kantor_realizuj") {
-
-    const modal = new ModalBuilder()
-        .setCustomId("kantor_modal")
-        .setTitle("Realizacja kantoru");
-
-    const idInput = new TextInputBuilder()
-        .setCustomId("kantor_id")
-        .setLabel("ID użytkownika")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    const kwotaInput = new TextInputBuilder()
-        .setCustomId("kantor_kwota")
-        .setLabel("Kwota do dodania")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    modal.addComponents(
-        new ActionRowBuilder().addComponents(idInput),
-        new ActionRowBuilder().addComponents(kwotaInput)
-    );
-
-    return interaction.showModal(modal);
-}
 
         // ----------------------------
         // KANTOR — REALIZACJA
@@ -572,7 +526,7 @@ if (interaction.customId === "kantor_realizuj") {
             });
         }
     });
-    
+
     // ============================
     // SELECT MENU — SKLEP
     // ============================
