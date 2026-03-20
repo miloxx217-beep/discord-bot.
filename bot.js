@@ -133,8 +133,8 @@ require("./register-commands.js");
 client.on("interactionCreate", async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
-    const ownerRoleId = "1478754923142316276"; 
-    const workChannelId = "1479872708928864388"; 
+    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← WSTAW ID ROLI
+    const workChannelId = "ID_KANAŁU_PRACUJ";  // ← WSTAW ID KANAŁU #pracuj
 
     // ============================
     // /pracuj
@@ -159,17 +159,27 @@ client.on("interactionCreate", async interaction => {
         acc.balance += amount;
         shared.setUserAccount(userId, acc.pin, acc.balance);
 
-        // jeśli komenda NIE została użyta na kanale #pracuj
+        // Tworzymy embed
+        const embed = {
+            title: "💼 Praca wykonana",
+            description:
+                `<@${userId}> wykonał pracę.\n` +
+                `Otrzymał: **${amount} $**\n` +
+                `Nowe saldo: **${acc.balance} $**`,
+            color: 0x00ff99,
+            thumbnail: {
+                url: interaction.user.displayAvatarURL({ dynamic: true })
+            },
+            timestamp: new Date()
+        };
+
+        const workChannel = client.channels.cache.get(workChannelId);
+
+        // Jeśli komenda NIE została użyta na kanale #pracuj
         if (interaction.channel.id !== workChannelId) {
 
-            const workChannel = client.channels.cache.get(workChannelId);
             if (workChannel) {
-                workChannel.send(
-                    `**Praca wykonana**\n` +
-                    `<@${userId}> wykonał pracę.\n` +
-                    `Otrzymał: **${amount} $**\n` +
-                    `Nowe saldo: **${acc.balance} $**`
-                );
+                workChannel.send({ embeds: [embed] });
             }
 
             return interaction.reply({
@@ -178,13 +188,8 @@ client.on("interactionCreate", async interaction => {
             });
         }
 
-        // jeśli komenda została użyta na kanale #pracuj
-        return interaction.reply(
-            `**Praca wykonana**\n` +
-            `<@${userId}> wykonał pracę.\n` +
-            `Otrzymał: **${amount} $**\n` +
-            `Nowe saldo: **${acc.balance} $**`
-        );
+        // Jeśli komenda została użyta na kanale #pracuj
+        return interaction.reply({ embeds: [embed] });
     }
 
     // ============================
