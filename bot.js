@@ -227,7 +227,7 @@ client.on("interactionCreate", async interaction => {
 
         // Tworzymy embed
         const embed = {
-            title: "💼 Praca wykonana",
+            title: "Praca wykonana",
             description:
                 `<@${userId}> wykonał pracę.\n` +
                 `Otrzymał: **${amount} $**\n` +
@@ -283,4 +283,3 @@ client.on("interactionCreate", async interaction => {
 // ============================
 client.login(process.env.TOKEN);  
   }
-});
