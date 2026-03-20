@@ -276,7 +276,6 @@ client.on("interactionCreate", async interaction => {
 
         return interaction.reply(`💰 Dodano **${kwota}** monet użytkownikowi **${user.username}**.`);
     }
-});
 
 // ============================
 // START
