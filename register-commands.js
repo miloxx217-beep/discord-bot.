@@ -1,41 +1,39 @@
 const { REST, Routes, SlashCommandBuilder } = require("discord.js");
-require("dotenv").config();
+
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+const token = process.env.TOKEN;
 
 const commands = [
 
     new SlashCommandBuilder()
         .setName("pracuj")
-        .setDescription("Pracuj i zarób od 30 do 400 monet."),
+        .setDescription("Pracujesz i zarabiasz pieniądze.")
+        .toJSON(),
 
     new SlashCommandBuilder()
         .setName("dodajkase")
-        .setDescription("Dodaj pieniądze użytkownikowi (tylko właściciel).")
+        .setDescription("Dodaje kasę użytkownikowi (tylko właściciel).")
         .addUserOption(option =>
             option.setName("uzytkownik")
-                .setDescription("Użytkownik, któremu chcesz dodać kasę")
-                .setRequired(true))
+                .setDescription("Komu dodać kasę")
+                .setRequired(true)
+        )
         .addIntegerOption(option =>
             option.setName("kwota")
-                .setDescription("Kwota do dodania")
-                .setRequired(true)),
+                .setDescription("Ile dodać")
+                .setRequired(true)
+        )
+        .toJSON()
+];
 
-    new SlashCommandBuilder()
-        .setName("resetdowod")
-        .setDescription("Resetuje możliwość wyrabiania dowodu użytkownikowi (tylko właściciel).")
-        .addUserOption(option =>
-            option.setName("uzytkownik")
-                .setDescription("Użytkownik, któremu chcesz zresetować dowód")
-                .setRequired(true))
-]
-    .map(cmd => cmd.toJSON());
-
-const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+const rest = new REST({ version: "10" }).setToken(token);
 
 (async () => {
     try {
         console.log("Rejestrowanie komend...");
         await rest.put(
-            Routes.applicationGuildCommands(process.env.CLIENT_ID, "1478750576408793239"),
+            Routes.applicationGuildCommands(clientId, guildId),
             { body: commands }
         );
         console.log("Komendy zarejestrowane!");
