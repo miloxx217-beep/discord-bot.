@@ -133,8 +133,8 @@ require("./register-commands.js");
 client.on("interactionCreate", async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
-    const ownerRoleId = "1478754923142316276"; // ← WSTAW ID ROLI
-    const workChannelId = "1479872708928864388";  
+    const ownerRoleId = "1478754923142316276"; 
+    const workChannelId = "1479872708928864388";
 
     // ============================
     // /pracuj
@@ -159,80 +159,14 @@ client.on("interactionCreate", async interaction => {
         acc.balance += amount;
         shared.setUserAccount(userId, acc.pin, acc.balance);
 
-        // Tworzymy embed
+        // EMBED
         const embed = {
             title: "💼 Praca wykonana",
             description:
                 `<@${userId}> wykonał pracę.\n` +
                 `Otrzymał: **${amount} $**\n` +
                 `Nowe saldo: **${acc.balance} $**`,
-            color: 0x00ff99,
-            thumbnail: {
-                url: interaction.user.displayAvatarURL({ dynamic: true })
-            },
-            timestamp: new Date()
-        };
-
-        const workChannel = client.channels.cache.get(workChannelId);
-
-        // Jeśli komenda NIE została użyta na kanale #pracuj
-        if (interaction.channel.id !== workChannelId) {
-
-            if (workChannel) {
-                workChannel.send({ embeds: [embed] });
-            }
-
-            return interaction.reply({
-                content: `💼 Praca wykonana! Sprawdź szczegóły na kanale <#${workChannelId}>.`,
-                ephemeral: true
-            });
-        }
-
-        // Jeśli komenda została użyta na kanale #pracuj
-        return interaction.reply({ embeds: [embed] });
-    }
-
-// ============================
-// OBSŁUGA KOMEND SLASH
-// ============================
-
-client.on("interactionCreate", async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
-    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← WSTAW ID ROLI
-    const workChannelId = "ID_KANAŁU_PRACUJ";  // ← WSTAW ID KANAŁU #pracuj
-
-    // ============================
-    // /pracuj
-    // ============================
-    if (interaction.commandName === "pracuj") {
-
-        const userId = interaction.user.id;
-        const now = Date.now();
-
-        const last = shared.workCooldown.get(userId) || 0;
-
-        if (now - last < 3600000) {
-            const remaining = Math.ceil((3600000 - (now - last)) / 60000);
-            return interaction.reply(`⏳ Możesz pracować ponownie za **${remaining} minut**.`);
-        }
-
-        shared.workCooldown.set(userId, now);
-
-        const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
-
-        const acc = shared.getUserAccount(userId) || { pin: "0000", balance: 0 };
-        acc.balance += amount;
-        shared.setUserAccount(userId, acc.pin, acc.balance);
-
-        // Tworzymy embed
-        const embed = {
-            title: "Praca wykonana",
-            description:
-                `<@${userId}> wykonał pracę.\n` +
-                `Otrzymał: **${amount} $**\n` +
-                `Nowe saldo: **${acc.balance} $**`,
-            color: 0x00ff99,
+            color: "Orange",
             thumbnail: {
                 url: interaction.user.displayAvatarURL({ dynamic: true })
             },
@@ -264,7 +198,10 @@ client.on("interactionCreate", async interaction => {
     if (interaction.commandName === "dodajkase") {
 
         if (!interaction.member.roles.cache.has(ownerRoleId)) {
-            return interaction.reply("❌ Nie masz uprawnień do tej komendy.");
+            return interaction.reply({
+                content: "❌ Nie masz uprawnień do tej komendy.",
+                ephemeral: true
+            });
         }
 
         const user = interaction.options.getUser("uzytkownik");
@@ -274,8 +211,12 @@ client.on("interactionCreate", async interaction => {
         acc.balance += kwota;
         shared.setUserAccount(user.id, acc.pin, acc.balance);
 
-        return interaction.reply(`💰 Dodano **${kwota}** monet użytkownikowi **${user.username}**.`);
+        return interaction.reply({
+            content: `💰 Dodano **${kwota} $** użytkownikowi **${user.username}**.`,
+            ephemeral: true
+        });
     }
+});
 
 // ============================
 // START
