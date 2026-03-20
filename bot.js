@@ -127,6 +127,56 @@ require("./resetdowod.js")(client, shared);
 require("./register-commands.js");
 
 // ============================
+// OBSŁUGA KOMEND SLASH
+// ============================
+client.on("interactionCreate", async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    const ownerRoleId = "ID_ROLI_WŁAŚCICIELA"; // ← Wstaw ID roli właściciel
+
+    // /pracuj
+    if (interaction.commandName === "pracuj") {
+
+        const userId = interaction.user.id;
+        const now = Date.now();
+
+        const last = shared.workCooldown.get(userId) || 0;
+
+        if (now - last < 3600000) {
+            const remaining = Math.ceil((3600000 - (now - last)) / 60000);
+            return interaction.reply(`⏳ Możesz pracować ponownie za **${remaining} minut**.`);
+        }
+
+        shared.workCooldown.set(userId, now);
+
+        const amount = Math.floor(Math.random() * (400 - 30 + 1)) + 30;
+
+        const acc = shared.getUserAccount(userId) || { pin: "0000", balance: 0 };
+        acc.balance += amount;
+        shared.setUserAccount(userId, acc.pin, acc.balance);
+
+        return interaction.reply(`💼 Pracowałeś i zarobiłeś **${amount} monet**!`);
+    }
+
+    // /dodajkase
+    if (interaction.commandName === "dodajkase") {
+
+        if (!interaction.member.roles.cache.has(ownerRoleId)) {
+            return interaction.reply("❌ Nie masz uprawnień do tej komendy.");
+        }
+
+        const user = interaction.options.getUser("uzytkownik");
+        const kwota = interaction.options.getInteger("kwota");
+
+        const acc = shared.getUserAccount(user.id) || { pin: "0000", balance: 0 };
+        acc.balance += kwota;
+        shared.setUserAccount(user.id, acc.pin, acc.balance);
+
+        return interaction.reply(`💰 Dodano **${kwota}** monet użytkownikowi **${user.username}**.`);
+    }
+});
+
+// ============================
 // START
 // ============================
 client.login(process.env.TOKEN);
