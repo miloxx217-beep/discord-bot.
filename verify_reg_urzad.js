@@ -483,7 +483,7 @@ W tym ticketcie możesz opisać:
 
 Postaraj się przedstawić sytuację możliwie dokładnie — ułatwi to szybsze i skuteczniejsze rozwiązanie Twojej sprawy.
 
-Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zostanie zauważona.`):
+Zachowaj kulturę wypowiedzi i nie spamuj wiadomościami — każda sprawa zostanie zauważona.`)
             }
 
             if (value === "praca_policjant") {
