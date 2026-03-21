@@ -124,7 +124,6 @@ require("./autovoice.js")(client, shared);
 require("./ranking.js")(client);
 require("./mandaty.js")(client);
 require("./resetdowod.js")(client, shared);
-require("./register-commands.js");
 
 // ============================
 // OBSŁUGA KOMEND SLASH
